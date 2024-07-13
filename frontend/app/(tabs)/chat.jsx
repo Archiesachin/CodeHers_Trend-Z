@@ -14,7 +14,7 @@ export default class HomeScreen extends Component {
   }
 
   componentDidMount() {
-    this.socket = io(REACT_NATIVE_IP);
+    this.socket = io("YOUR IP ADDRESS");
     this.socket.on("chat message", (msg) => {
       this.setState({ chatMessages: [...this.state.chatMessages, msg] });
     });
