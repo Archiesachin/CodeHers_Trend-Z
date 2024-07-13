@@ -146,6 +146,21 @@ const TabsLayout = () => {
         }}
       />
       <Tabs.Screen
+        name="interest"
+        options={{
+          title: "interest",
+          headerShown: false,
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon
+              icon={icons.play}
+              color={color}
+              name="Interest"
+              focused={focused}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="trends"
         options={{
           title: "trends",
