@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "Trend-Z",
+    "scheme": "Trend-Z",
+    "slug": "Trend-Z",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "permissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_MEDIA_LOCATION",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ], 
+      "package" : "com.betomoedano.snapchatcamera"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      ["expo-media-library",{ "photoPermission" : "Allow $(PRODUCT_NAME) to access your photos.", "savePhotoPermission" : "Allow $(PRODUCT_NAME) to save your photos.","isAccessMediaLoactionEnabled" : true}], 
+      ["expo-camera",{"cameraPermission" : "Allow $(PRODUCT_NAME) to access your camera.","microphonePermission" : "Allow $(PRODUCT_NAME) to access your microphone.","recordAudioAndroid" : true}]
+      
+    ]
+  }
+}
