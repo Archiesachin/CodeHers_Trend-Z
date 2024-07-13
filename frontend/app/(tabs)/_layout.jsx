@@ -91,17 +91,18 @@ const TabsLayout = () => {
     <Tabs
       screenOptions={{
         tabBarShowLabel: false,
-        tabBarActiveTintColor: '#F13AB1',
-        tabBarInactiveTintColor: '#CDCDE0',
+        tabBarActiveTintColor: "#F13AB1",
+        tabBarInactiveTintColor: "#CDCDE0",
         tabBarStyle: {
           borderTopWidth: 1,
           height: 84,
         },
-      }}>
+      }}
+    >
       <Tabs.Screen
-        name='home'
+        name="home"
         options={{
-          title: 'Home',
+          title: "Home",
           headerShown: false,
           tabBarIcon: ({ color, focused }) => (
             <TabIcon
@@ -115,16 +116,12 @@ const TabsLayout = () => {
       />
 
       <Tabs.Screen
-        name='snapchat'
+        name="snapchat"
         options={{
-          title: 'Snapchat',
+          title: "Snapchat",
           headerShown: false,
           tabBarIcon: ({ focused }) => (
-            <TabIcon
-              icon={icons.snapchat}
-              name="SnapChat"
-              focused={focused}
-            />
+            <TabIcon icon={icons.snapchat} name="SnapChat" focused={focused} />
           ),
           tabBarButton: (props) => (
             <TouchableWithoutFeedback onPress={() => handleContinue()}>
@@ -133,11 +130,25 @@ const TabsLayout = () => {
           ),
         }}
       />
-
       <Tabs.Screen
-        name='trends'
+        name="chat"
         options={{
-          title: 'trends',
+          title: "chat",
+          headerShown: false,
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon
+              icon={icons.plus}
+              color={color}
+              name="Chat"
+              focused={focused}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="trends"
+        options={{
+          title: "trends",
           headerShown: false,
           tabBarIcon: ({ color, focused }) => (
             <TabIcon
@@ -151,15 +162,15 @@ const TabsLayout = () => {
       />
 
       <Tabs.Screen
-        name='profile'
+        name="profile"
         options={{
-          title: userName ? userName : 'Profile',
+          title: userName ? userName : "Profile",
           headerShown: false,
           tabBarIcon: ({ color, focused }) => (
             <TabIcon
               icon={icons.profile}
               color={color}
-              name={userName ? userName : 'Profile'}
+              name={userName ? userName : "Profile"}
               focused={focused}
             />
           ),
