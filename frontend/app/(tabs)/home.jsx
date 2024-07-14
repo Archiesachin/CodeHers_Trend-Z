@@ -1,10 +1,29 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import { Text, View, FlatList, Image, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { icons, images } from '../../constants';
 import Searchinput from '../../components/Searchinput';
+import ProductList from '../../components/interest'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Home = () => {
+  const [tags, setTags] = useState(["summer"]);
+
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const storedTags = await AsyncStorage.getItem("favoriteShow");
+        if (storedTags) {
+          setTags(storedTags.split(",").map((tag) => tag.trim()));
+        }
+      } catch (error) {
+        console.error("Failed to load tags from AsyncStorage:", error);
+      }
+    };
+
+    fetchTags();
+  }, []);
+
   return (
     <SafeAreaView>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
@@ -78,7 +97,7 @@ const Home = () => {
           </View>
         </View>
 
-        <View className="justify-start gap-2 items-start flex-row px-2 ">
+        <View className="justify-start gap-2 items-start flex-row px-2 mb-4">
             <View className=" h-[30px] border-2 border-gray-100 rounded-2xl items-center justify-center">
               <Text className="font-bold text-center text-secondary-100 px-4">
                 Recommended For You
@@ -86,19 +105,7 @@ const Home = () => {
            </View>
           </View>
 
-        <FlatList
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          data={[{ id: 1 }, { id: 2 }, { id: 3 }]}
-          keyExtractor={(item) => item.id.toString()} 
-          renderItem={({ item }) => (
-            <View className="px-2 my-4 justify-between items-start flex-1">
-              <View className="w-[150px] h-[200px] bg-black-100">
-                <Text>{item.id}</Text>
-              </View>
-            </View>
-          )}
-        />
+        <ProductList tags={tags}/>
       </ScrollView>
     </SafeAreaView>
   );

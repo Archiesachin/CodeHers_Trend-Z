@@ -98,7 +98,7 @@ const SignIn = () => {
             onPress={handleLogin}
             className="w-full px-4 py-2 rounded-xl bg-secondary my-3 flex items-center justify-center"
           >
-            <Text className="py-2 text-white text-xl text-600">
+            <Text className="py-2 text-white text-xl font-bold">
               Sign In
             </Text>
           </TouchableOpacity>
@@ -107,7 +107,7 @@ const SignIn = () => {
             <Text style={{ fontSize: 16, color: 'black', fontWeight: 'bold' }}>Don't have an account?</Text>
             <Link
               href="/sign-up"
-              className="text-lg text-600 text-secondary-100"
+              className="text-lg font-bold text-secondary-100"
               style={{ fontSize: 16, color: '#FF1493', marginLeft: 5 }}
             >
               Sign Up

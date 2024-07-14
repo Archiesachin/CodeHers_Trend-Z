@@ -18,7 +18,7 @@ const ProductList = ({ tags }) => {
     const fetchProducts = async () => {
       try {
         const response = await fetch(
-          "https://7bba-103-115-21-184.ngrok-free.app/scrape",
+          "https://5d4a-150-242-207-136.ngrok-free.app/scrape",
           {
             method: "POST",
             headers: {
@@ -50,6 +50,8 @@ const ProductList = ({ tags }) => {
 
   return (
     <FlatList
+    horizontal
+    showsHorizontalScrollIndicator={false}
       data={products}
       keyExtractor={(item) => item.url}
       renderItem={({ item }) => (
