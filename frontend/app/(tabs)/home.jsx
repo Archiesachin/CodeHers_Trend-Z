@@ -11,10 +11,10 @@ const Home = () => {
         <View className="my-6 space-y-6">
           <View className="justify-between items-start flex-row px-6 mb-2">
             <View>
-              <Text className="font-pmedium text-sm text-secondary-100">
+              <Text className="font-bold text-md text-secondary-100">
                 Welcome Back
               </Text>
-              <Text className=" text-2xl font-psemibold text-secondary-100">
+              <Text className=" text-2xl font-bold text-secondary-100">
                 Trend-Z
               </Text>
             </View>
@@ -47,12 +47,12 @@ const Home = () => {
 
           <View className="justify-between items-start flex-row px-6 ">
             <View className="w-[150px] h-[30px] border-2 border-gray-100 rounded-2xl items-center justify-center">
-              <Text className="font-psemibold text-center text-secondary-100">
+              <Text className="font-bold text-center text-secondary-100">
                 Men
               </Text>
             </View>
             <View className="w-[150px] h-[30px] border-2 border-gray-100 rounded-2xl items-center justify-center">
-              <Text className="font-psemibold text-center text-secondary-100">
+              <Text className="font-bold text-center text-secondary-100">
                 Women
               </Text>
             </View>
@@ -67,7 +67,7 @@ const Home = () => {
             <Text className="text-center font-bold text-3xl text-secondary-100">
               NEW & TRENDING
             </Text>
-            <Text className="text-center font-semibold text-sm text-primary">
+            <Text className="text-center text-sm text-primary">
               Shop Now
             </Text>
             <Image
@@ -80,20 +80,10 @@ const Home = () => {
 
         <View className="justify-start gap-2 items-start flex-row px-2 ">
             <View className=" h-[30px] border-2 border-gray-100 rounded-2xl items-center justify-center">
-              <Text className="font-psemibold text-center text-secondary-100 px-4">
-                Today
+              <Text className="font-bold text-center text-secondary-100 px-4">
+                Recommended For You
               </Text>
-            </View>
-            <View className=" h-[30px] border-2 border-gray-100 rounded-2xl items-center justify-center">
-              <Text className="font-psemibold text-center text-secondary-100 px-4">
-                Last Week
-              </Text>
-            </View>
-            <View className=" h-[30px] border-2 border-gray-100 rounded-2xl items-center justify-center">
-              <Text className="font-psemibold text-center text-secondary-100 px-4">
-                Last Month
-              </Text>
-            </View>
+           </View>
           </View>
 
         <FlatList

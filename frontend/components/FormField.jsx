@@ -9,7 +9,7 @@ const FormField = ({ value, placeholder, handleChangeText, otherStyles, ...props
     <View className={` ${otherStyles}`}>
       <View className="border border-gray-200 rounded-2xl px-4 py-6 flex-row items-center justify-between space-x-4 w-[320px]">
         <TextInput
-          className="flex-1 text-base text-primaryText font-semibold -mt-1"
+          className="flex-1 text-base text-primaryText  -mt-1"
           value={value}
           placeholder={placeholder}
           placeholderTextColor='#7b7b8b'

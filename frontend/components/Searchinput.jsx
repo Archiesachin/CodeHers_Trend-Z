@@ -7,7 +7,7 @@ const Searchinput = ({title, value, placeholder, handleChangeText, otherStyles, 
   return (
     
       <View className=" w-full h-16 px-4 bg-gray-100 rounded-2xl focus:border-secondary-100 items-center flex-row space-x-4 ">
-      <TextInput className=" flex-1 text-primary font-regular text-base mt-0.5"
+      <TextInput className=" flex-1 text-primary text-bold text-base mt-0.5"
         value={value}
         placeholder="Search"
         placeholderTextColor='#7b7b8b'

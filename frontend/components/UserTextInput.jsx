@@ -37,7 +37,7 @@ const UserTextInput = ({
     >
 
       <TextInput
-        className="flex-1 text-base text-primaryText font-psemibold -mt-1"
+        className="flex-1 text-base text-primaryText -mt-1"
         placeholder={placeholder}
         value={value}
         placeholderTextColor='#7b7b8b'

@@ -40,7 +40,7 @@ const ChatScreen = () => {
   const textInputRef = useRef(null);
 
   // Check if the route params exist and log them for debugging
-  console.log("Route params:", route.params);
+
 
   if (!route.params || !route.params.room) {
     console.error("No room data found in route params", route.params);

@@ -19,7 +19,6 @@ const RootLayout = () => {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="AddToChat" options={{ headerShown: false }} />
         <Stack.Screen name="snapStory" options={{ headerShown: false }} />
-        {/* <Stack.Screen name="ChatScreen" options={{ headerShown: false }} /> */}
       </Stack>
     </Provider>
   );
