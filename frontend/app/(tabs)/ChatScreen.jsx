@@ -10,7 +10,7 @@ import {
   Image,
 } from "react-native";
 import React, { useLayoutEffect, useRef, useState } from "react";
-import { Entypo, FontAwesome } from "@expo/vector-icons";
+import { Entypo, FontAwesome, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
   addDoc,
@@ -98,8 +98,18 @@ const ChatScreen = () => {
 
   return (
     <View className="flex-1">
-      <View className="w-full h-full bg-secondary-100 px-4 py-6 flex-[0.2] -mt-2">
+      <View className="w-full h-full bg-secondary-100 px-4 py-6 flex-[0.2] -mt-2 flex-row">
+      <View className="flex-row mt-8">
+      <TouchableOpacity onPress={() => navigation.goBack()}>
+            <MaterialIcons name="chevron-left" size={32} color={"#fff"} />
+          </TouchableOpacity>
+          <View className="pl-4">
+          <View className="w-12 h-12 rounded-full border border-white flex items-center justify-center">
+              <FontAwesome5 name="users" size={24} color="#fbfbfb" />
+            </View>
         <Text className="text-lg font-bold text-white">{room.chatName}</Text>
+        </View>
+        </View>
       </View>
 
       <View className="w-full bg-white px-4 py-6 flex-1 -mt-2">
