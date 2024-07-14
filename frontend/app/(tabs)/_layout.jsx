@@ -192,6 +192,13 @@ const TabsLayout = () => {
           headerShown: false
         }}
       />
+      <Tabs.Screen
+        name="RoomSelectionModal"
+        options={{
+          tabBarButton : () => null,
+          headerShown: false
+        }}
+      />
     </Tabs>
   );
 };

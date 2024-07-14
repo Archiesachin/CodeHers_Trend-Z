@@ -4,10 +4,11 @@ import { CameraView } from 'expo-camera'
 import BottomRowTools from '../../components/BottomRowTools'
 import MainRowActions from '../../components/MainRowActions'
 import PictureView from '../../components/PictureView'
-import { Link, useRouter } from 'expo-router'
+import { useRouter } from 'expo-router'
 import { TouchableOpacity, Image } from 'react-native'
 import { icons } from '../../constants'
-import * as Sharing from 'expo-sharing';
+import {  ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '../../config/firebase.config';
 
 const Snapchat = () => {
   const router = useRouter()
@@ -16,22 +17,38 @@ const Snapchat = () => {
   const [picture, setPicture] = useState("")
 
   async function handleTakePicture() {
-    const response = await cameraRef.current?.takePictureAsync({})
-    console.log(response.uri)
-    setPicture(response.uri)
+    const response = await cameraRef.current?.takePictureAsync({});
+    console.log(response.uri);
+    setPicture(response.uri);
   }
+  
 
-  async function handleShare() {
-    if (await Sharing.isAvailableAsync()) {
-      await Sharing.shareAsync(picture);
-      router.push({
-        pathname: '/snapStory',
-        params: { pictureUri: picture }
-      });
+  
+  const handleShare = async () => {
+    if (picture) {
+      try {
+        const response = await fetch(picture);
+        const blob = await response.blob();
+
+        const storageRef = ref(storage, `images/${Date.now()}.jpg`);
+        await uploadBytes(storageRef, blob);
+
+        const downloadURL = await getDownloadURL(storageRef);
+        console.log("Image uploaded successfully:", downloadURL);
+
+        router.push({
+          pathname: '/snapStory',
+          params: { pictureUri: downloadURL },
+        });
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        alert("Failed to upload and share the image. Please check the console for more details.");
+      }
     } else {
-      alert("Sharing is not available on this device");
+      alert("No picture to share.");
     }
-  }
+  }; 
+
 
   if (picture) return <PictureView picture={picture} setPicture={setPicture} handleShare={handleShare}/>
 

@@ -1,72 +1,61 @@
 import React, { useState, useEffect } from 'react';
-import { View, FlatList, Modal, TouchableOpacity, Image, Text, Alert, Button } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as FileSystem from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
-import { icons } from '../constants'; // Ensure you import your icons correctly
+import { View, FlatList, Modal, TouchableOpacity, Image, Text, Alert } from 'react-native';
+import { getDoc, doc } from 'firebase/firestore';
+import { ref, getDownloadURL, listAll } from 'firebase/storage';
+import { firestoreDB, storage } from '../config/firebase.config'; 
+import { firebaseAuth } from '../config/firebase.config'; 
+import {icons} from '../constants'
+import {MaterialIcons} from "@expo/vector-icons";
+import { useNavigation} from "@react-navigation/native";
 
 const SnapStory = () => {
-  const { pictureUri } = useLocalSearchParams();
   const [accountName, setAccountName] = useState('');
-  const [data, setData] = useState([
-    { id: '1', pictureUri: 'https://cdn.pixabay.com/photo/2018/06/25/17/02/fashion-3497410_1280.jpg', accountName: "Default User 1" },
-    { id: '2', pictureUri: 'https://cdn.pixabay.com/photo/2018/06/25/17/02/fashion-3497410_1280.jpg', accountName: "Default User 2" },
-    { id: '3', pictureUri: 'https://cdn.pixabay.com/photo/2018/06/25/17/02/fashion-3497410_1280.jpg', accountName: "Default User 3" },
-    { id: '4', pictureUri: 'https://cdn.pixabay.com/photo/2018/06/25/17/02/fashion-3497410_1280.jpg', accountName: "Default User 4" },
-  ]);
+  const [data, setData] = useState([]);
+  const navigation = useNavigation();
 
   useEffect(() => {
-    const fetchAccountNames = async () => {
+    const fetchUserData = async () => {
       try {
-        const userDataString = await AsyncStorage.getItem('userData');
-        if (userDataString) {
-          const userData = JSON.parse(userDataString);
-          setAccountName(userData.name); // Set the account name from user data
-          
-          // Add the retrieved account name as a new entry in the data array
-          const newEntry = {
-            id: (data.length + 1).toString(),
-            pictureUri: '', 
-            accountName: userData.name,
-          };
-          setData((prevData) => [...prevData, newEntry]);
+        const user = firebaseAuth.currentUser;
+        if (user) {
+          const userDoc = await getDoc(doc(firestoreDB, 'users', user.uid));
+          if (userDoc.exists()) {
+            setAccountName(userDoc.data().fullName);
+          } else {
+            console.log('No such document!');
+          }
         }
       } catch (error) {
-        console.error("Error retrieving account name:", error);
+        console.error('Failed to fetch user data:', error);
       }
     };
 
-    fetchAccountNames();
-    
-    // Validate pictureUri if it exists
-    if (pictureUri) {
-      console.log("Received picture URI:", pictureUri); // Debug log
-      addPictureToStory(pictureUri);
-    }
-  }, [pictureUri]);
+    fetchUserData();
+  }, []);
 
-  const addPictureToStory = async (newPictureUri) => {
-    if (newPictureUri) {
+  useEffect(() => {
+    const fetchImages = async () => {
       try {
-        const fileInfo = await FileSystem.getInfoAsync(newPictureUri);
-        if (fileInfo.exists) {
-          // Use Sharing to validate the URI
-          await Sharing.shareAsync(newPictureUri);
-          
-          const newId = (data.length + 1).toString();
-          const newData = [...data, { id: newId, pictureUri: newPictureUri, accountName }];
-          setData(newData);
-        } else {
-          Alert.alert("Error", "Image file does not exist.");
-        }
+        const storageRef = ref(storage, 'images/');
+        const imagesList = await listAll(storageRef);
+        const imagePromises = imagesList.items.map((imageRef) => getDownloadURL(imageRef));
+
+        const imageUrls = await Promise.all(imagePromises);
+
+        const imageData = imageUrls.map((url, index) => ({
+          id: (index + 1).toString(),
+          pictureUri: url,
+          accountName: accountName || "Default User", // Use default if account name not fetched yet
+        }));
+
+        setData(imageData);
       } catch (error) {
-        Alert.alert("Error", "Failed to check image file existence.");
+        console.error("Error fetching images:", error);
       }
-    } else {
-      Alert.alert("Error", "Invalid picture URI.");
-    }
-  };
+    };
+
+    fetchImages();
+  }, [accountName]);
 
   const [selectedItem, setSelectedItem] = useState(null);
 
@@ -76,9 +65,9 @@ const SnapStory = () => {
         <Image
           source={{ uri: item.pictureUri }}
           style={{ width: '100%', height: '100%', borderRadius: 8 }}
-          onLoad={() => console.log("Image loaded:", item.pictureUri)} // Debug log
+          onLoad={() => console.log("Image loaded:", item.pictureUri)}
           onError={(error) => {
-            console.log("Image load error:", error.nativeEvent.error); // Debug log for error
+            console.log("Image load error:", error.nativeEvent.error);
             Alert.alert("Image Load Error", "Unable to load image.");
           }}
         />
@@ -89,16 +78,11 @@ const SnapStory = () => {
           right: 0,
           flexDirection: 'row',
           alignItems: 'center',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
           padding: 10,
           borderBottomLeftRadius: 8,
           borderBottomRightRadius: 8,
         }}>
-          <Image
-            source={icons.profile} // Make sure to use the correct profile icon path
-            style={{ width: 20, height: 20, borderRadius: 10, marginRight: 5 }}
-          />
-          <Text style={{ color: '#fff' }}>{item.accountName}</Text>
+          <Text className="text-xl font-bold text-white">{item.accountName}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -109,7 +93,22 @@ const SnapStory = () => {
   };
 
   return (
-    <View style={{ flex: 1, padding: 4, marginTop: 20 }}>
+    <View style={{ flex: 1, padding: 4, marginTop: 40 }}>
+    <View className="flex-row items-center justify-between p-2 mb-4">
+    <TouchableOpacity onPress={() => navigation.goBack()}>
+            <MaterialIcons name="chevron-left" size={32} color={"#000"} />
+          </TouchableOpacity>
+          <Text className="font-bold text-2xl uppercase text-secondary-100">Fashion Snap</Text>
+      <View>
+      <Image
+        source={icons.profile}
+        className="rounded-3xl w-[35px] h-[35px] mt-2"
+        resizeMode='contain'
+      />
+      <Text className="font-bold text-secondary-100 text-[15px]">{accountName}</Text>
+      </View>
+    </View>
+
       <FlatList
         data={data}
         keyExtractor={(item) => item.id}
@@ -122,13 +121,13 @@ const SnapStory = () => {
         <TouchableOpacity style={{ flex: 1 }} onPress={handleCloseModal}>
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.8)' }}>
             <View style={{ width: '80%', height: '80%', backgroundColor: '#333333', borderRadius: 8 }}>
-              <Text style={{ color: '#fff', textAlign: 'center', marginTop: 20 }}>Full Screen View</Text>
+              
               <Image
                 source={{ uri: selectedItem?.pictureUri }}
                 style={{ width: '100%', height: '100%', borderRadius: 8 }}
-                onLoad={() => console.log("Selected image loaded:", selectedItem?.pictureUri)} // Debug log
+                onLoad={() => console.log("Selected image loaded:", selectedItem?.pictureUri)}
                 onError={(error) => {
-                  console.log("Selected image load error:", error.nativeEvent.error); // Debug log for error
+                  console.log("Selected image load error:", error.nativeEvent.error);
                   Alert.alert("Image Load Error", "Unable to load selected image.");
                 }}
               />

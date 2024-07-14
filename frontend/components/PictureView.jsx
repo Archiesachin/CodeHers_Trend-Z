@@ -1,9 +1,37 @@
-import { View, Image, TouchableOpacity, Text, Alert } from 'react-native'
-import React from 'react'
-import { icons } from '../constants'
-import { saveToLibraryAsync } from 'expo-media-library'
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Alert,
+  Modal,
+  Image,
+} from "react-native";
+import React, { useState, useEffect } from "react";
+import { icons } from '../constants';
+import { saveToLibraryAsync } from 'expo-media-library';
+import RoomSelectionModal from '../app/(tabs)/RoomSelectionModal';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { firestoreDB } from '../config/firebase.config';
 
-const PictureView = ({ picture, setPicture,  handleShare }) => {
+const PictureView = ({ picture, setPicture, handleShare }) => {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [roomSelectionVisible, setRoomSelectionVisible] = useState(false);
+  const [rooms, setRooms] = useState([]);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(firestoreDB, 'chats'), (querySnapshot) => {
+      const chatRooms = querySnapshot.docs.map((doc) => ({ _id: doc.id, ...doc.data() }));
+      setRooms(chatRooms);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleShareOnStory = () => {
+    handleShare();
+    setModalVisible(false);
+  };
+
   return (
     <View className="flex-1 justify-center items-center">
       <Image
@@ -11,39 +39,85 @@ const PictureView = ({ picture, setPicture,  handleShare }) => {
         className="w-full h-full"
       />
       <View className="flex-row mt-[-100px]">
-        <TouchableOpacity 
-          onPress={async() => {
-            await saveToLibraryAsync(picture)
-            Alert.alert("Picture saved")
-            }} 
-          className="bg-secondary-100 p-2 mx-1 rounded-3xl"
+        <TouchableOpacity
+          onPress={async () => {
+            await saveToLibraryAsync(picture);
+            Alert.alert("Picture saved");
+          }}
+          className="bg-secondary-100 p-2 mx-1 rounded-3xl flex-row"
         >
           <Image
             source={icons.save}
             className="w-[25px] h-[25px]"
           />
+          <Text className="text-white font-bold ml-1 mt-1">Save to Gallery</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          onPress={handleShare} 
-          className="bg-secondary-100 p-2 mx-1 rounded-3xl"
+
+        <TouchableOpacity
+          onPress={() => setModalVisible(true)}
+          className="bg-secondary-100 p-2 mx-1 rounded-3xl flex-row"
         >
           <Image
             source={icons.share}
             className="w-[25px] h-[25px]"
           />
-        </TouchableOpacity>
-        <TouchableOpacity 
-          onPress={() => setPicture('')} 
-          className="bg-secondary-100 p-2 mx-1 rounded-3xl"
-        >
-          <Image
-            source={icons.close}
-            className="w-[25px] h-[25px]"
-          />
+          <Text className="text-white font-bold ml-2 mt-[0.8]">Share</Text>
         </TouchableOpacity>
       </View>
-    </View>
-  )
-}
 
-export default PictureView
+      <TouchableOpacity
+        onPress={() => setPicture('')}
+        className="bg-secondary-100 p-2 mx-1 rounded-3xl absolute right-0 top-12"
+      >
+        <Image
+          source={icons.close}
+          className="w-[23px] h-[23px]"
+        />
+      </TouchableOpacity>
+
+      {/* Modal for sharing options */}
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        animationType="slide"
+      >
+        <View className="flex-1 justify-center items-center bg-black bg-opacity-50">
+          <View className="bg-white rounded-lg p-4 w-80">
+            <Text className="text-lg font-bold text-center mb-4">Share Options</Text>
+            <TouchableOpacity
+              onPress={handleShareOnStory}
+              className="bg-secondary-100 p-2 rounded-lg mb-2"
+            >
+              <Text className="text-white text-center">Share on Story</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                setModalVisible(false);
+                setRoomSelectionVisible(true);
+              }}
+              className="bg-secondary-100 p-2 rounded-lg"
+            >
+              <Text className="text-white text-center">Share on Chat</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setModalVisible(false)}
+              className="mt-4"
+            >
+              <Text className="text-red-500 text-center">Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Room Selection Modal */}
+      <RoomSelectionModal
+        visible={roomSelectionVisible}
+        rooms={rooms}
+        picture={picture}
+        onClose={() => setRoomSelectionVisible(false)}
+      />
+    </View>
+  );
+};
+
+export default PictureView;
