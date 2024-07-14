@@ -1,47 +1,62 @@
 import React, { useState } from 'react';
-import { View, Text, Image, ScrollView, Alert } from 'react-native';
+import { View, Text, Image, ScrollView, Alert, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { images } from '../../constants';
-import FormField from '../../components/FormField';
-import CustomButton from '../../components/CustomButton';
+import UserTextInput from '../../components/UserTextInput';
 import { Link, useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {signInWithEmailAndPassword} from 'firebase/auth'
+import { firebaseAuth, firestoreDB } from '../../config/firebase.config';
+import { useDispatch } from 'react-redux';
+import { SET_USER } from '../../context/action/userAction';
+import { doc, getDoc } from 'firebase/firestore';
+
 
 const SignIn = () => {
   const router = useRouter();
+  const dispatch = useDispatch()
 
-  const [form, setForm] = useState({
-    email: '',
-    password: ''
-  });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [getEmailValidationStatus, setGetEmailValidationStatus] =
+    useState(false);
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [alert, setAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState(null);
 
-  const submit = async () => {
-    if (!form.email || !form.password) {
-      Alert.alert('Error', 'Please fill in all fields.');
-      return;
-    }
 
-    try {
-      setIsSubmitting(true);
-      const userDataString = await AsyncStorage.getItem('userData');
-      if (userDataString) {
-        const userData = JSON.parse(userDataString);
-        if (userData.email === form.email && userData.password === form.password) {
-          Alert.alert('Success', 'Signed in successfully!');
-          // Navigate to home or other authenticated screen
-          router.push('/home');
-        } else {
-          Alert.alert('Error', 'Invalid email or password.');
-        }
-      } else {
-        Alert.alert('Error', 'User data not found. Please sign up.');
-      }
-    } catch (error) {
-      Alert.alert('Error', 'Failed to sign in. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+  const handleLogin = async () => {
+    if (getEmailValidationStatus && email !== "") {
+      await signInWithEmailAndPassword(firebaseAuth, email, password)
+        .then((userCred) => {
+          if (userCred) {
+            console.log("User Id:", userCred?.user.uid);
+            getDoc(doc(firestoreDB, "users", userCred?.user.uid)).then(
+              (docSnap) => {
+                if (docSnap.exists()) {
+                  console.log("User Data : ", docSnap.data());
+                  dispatch(SET_USER(docSnap.data()));
+                  router.push("/home")
+                }
+              }
+            );
+          }
+        })
+        .catch((err) => {
+          console.log("Error : ", err.message);
+          if (err.message.includes("wrong-password")) {
+            setAlert(true);
+            setAlertMessage("Password Mismatch");
+          } else if (err.message.includes("user-not-found")) {
+            setAlert(true);
+            setAlertMessage("User Not Found");
+          } else {
+            setAlert(true);
+            setAlertMessage("Invalid Email Address");
+          }
+          setInterval(() => {
+            setAlert(false);
+          }, 2000);
+        });
     }
   };
 
@@ -54,35 +69,45 @@ const SignIn = () => {
             resizeMode='contain'
             style={{ width: 140, height: 100 }}
           />
-          <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#FF1493', textAlign: 'center', marginTop: 20 }}>Exploring Trends with Trend-Z</Text>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#FF1493', textAlign: 'center', marginTop: 20, marginBottom:20 }}>Exploring Trends with Trend-Z</Text>
 
-          <FormField
-            title="Email"
-            value={form.email}
-            handleChangeText={(e) => setForm({ ...form, email: e })}
-            otherStyles="mt-7"
-            keyboardType="email-address"
-          />
-          <FormField
-            title="Password"
-            value={form.password}
-            handleChangeText={(e) => setForm({ ...form, password: e })}
-            otherStyles="mt-7"
-            secureTextEntry={true}
+
+          {alert && (
+            <Text className="text-base text-red-600">{alertMessage}</Text>
+          )}
+
+
+          <UserTextInput
+            placeholder="Email"
+            isPass={false}
+            setStatValue={setEmail}
+            setGetEmailValidationStatus={setGetEmailValidationStatus}
           />
 
-          <CustomButton
-            title="Sign In"
-            handlePress={submit}
-            containerStyles="mt-7 w-[300px]"
-            isLoading={isSubmitting}
+          {/* password */}
+
+          <UserTextInput
+            placeholder="Password"
+            isPass={true}
+            setStatValue={setPassword}
           />
+
+          {/* login button */}
+
+          <TouchableOpacity
+            onPress={handleLogin}
+            className="w-full px-4 py-2 rounded-xl bg-secondary my-3 flex items-center justify-center"
+          >
+            <Text className="py-2 text-white text-xl font-semibold">
+              Sign In
+            </Text>
+          </TouchableOpacity>
 
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 10 }}>
             <Text style={{ fontSize: 16, color: 'black', fontWeight: 'bold' }}>Don't have an account?</Text>
             <Link
               href="/sign-up"
-              className="text-lg font-psemibold text-secondary-100"
+              className="text-lg font-semibold text-secondary-100"
               style={{ fontSize: 16, color: '#FF1493', marginLeft: 5 }}
             >
               Sign Up

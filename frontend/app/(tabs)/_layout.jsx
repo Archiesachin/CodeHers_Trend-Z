@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Image, Alert, TouchableWithoutFeedback } from 'react-native';
-import { Tabs, useRouter , Redirect} from 'expo-router';
+import { Tabs, useRouter, Redirect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCameraPermissions, useMicrophonePermissions } from 'expo-camera';
 import { usePermissions } from 'expo-media-library';
 import { icons } from '../../constants';
-
-
+import { doc, getDoc } from 'firebase/firestore';
+import { firebaseAuth, firestoreDB } from '../../config/firebase.config';
 
 const TabIcon = ({ icon, color, name, focused }) => {
   return (
@@ -24,7 +24,6 @@ const TabIcon = ({ icon, color, name, focused }) => {
   );
 }
 
-
 const TabsLayout = () => {
   const router = useRouter();
 
@@ -35,7 +34,7 @@ const TabsLayout = () => {
   const handleContinue = async () => {
     const allPermissions = await requestAllPermission();
     if (allPermissions) {
-      router.replace("/snapchat")
+      router.replace("/snapchat");
     } else {
       Alert.alert('Permissions Required', 'Please provide necessary permissions in settings');
     }
@@ -69,15 +68,19 @@ const TabsLayout = () => {
     }
   };
 
-  const [userName, setUserName] = useState('');
+  const [name, setName] = useState('');
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const userData = await AsyncStorage.getItem('userData');
-        if (userData !== null) {
-          const { name } = JSON.parse(userData);
-          setUserName(name);
+        const user = firebaseAuth.currentUser;
+        if (user) {
+          const userDoc = await getDoc(doc(firestoreDB, 'users', user.uid));
+          if (userDoc.exists()) {
+            setName(userDoc.data().fullName);
+          } else {
+            console.log('No such document!');
+          }
         }
       } catch (error) {
         console.error('Failed to fetch user data:', error);
@@ -133,11 +136,11 @@ const TabsLayout = () => {
       <Tabs.Screen
         name="chat"
         options={{
-          title: "chat",
+          title: "Chat",
           headerShown: false,
           tabBarIcon: ({ color, focused }) => (
             <TabIcon
-              icon={icons.plus}
+              icon={icons.chat}
               color={color}
               name="Chat"
               focused={focused}
@@ -148,7 +151,7 @@ const TabsLayout = () => {
       <Tabs.Screen
         name="interest"
         options={{
-          title: "interest",
+          title: "Interest",
           headerShown: false,
           tabBarIcon: ({ color, focused }) => (
             <TabIcon
@@ -163,11 +166,11 @@ const TabsLayout = () => {
       <Tabs.Screen
         name="trends"
         options={{
-          title: "trends",
+          title: "Trends",
           headerShown: false,
           tabBarIcon: ({ color, focused }) => (
             <TabIcon
-              icon={icons.plus}
+              icon={icons.hashtag}
               color={color}
               name="Trends"
               focused={focused}
@@ -175,20 +178,26 @@ const TabsLayout = () => {
           ),
         }}
       />
-
       <Tabs.Screen
         name="profile"
         options={{
-          title: userName ? userName : "Profile",
+          title: name || 'Profile',
           headerShown: false,
           tabBarIcon: ({ color, focused }) => (
             <TabIcon
               icon={icons.profile}
               color={color}
-              name={userName ? userName : "Profile"}
+              name={name ? name : "Profile"}
               focused={focused}
             />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="ChatScreen"
+        options={{
+          tabBarButton : () => null,
+          headerShown: false
         }}
       />
     </Tabs>

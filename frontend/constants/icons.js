@@ -23,6 +23,8 @@ import share from '../assets/icons/share.png'
 import close from '../assets/icons/close.png'
 import save from '../assets/icons/save.png'
 import user from '../assets/icons/user.png'
+import chat from '../assets/icons/chat.png'
+import hashtag from '../assets/icons/hashtag.png'
 
 
 export default {
@@ -50,5 +52,7 @@ export default {
   share,
   save,
   close,
-  user
+  user,
+  hashtag,
+  chat
 };

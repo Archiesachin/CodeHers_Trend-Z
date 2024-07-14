@@ -51,15 +51,7 @@ const MainRowActions = ({ cameraMode, handleTakePictures, isRecording }) => {
           style={{ width: 70, height: 70 }}
         />
       </TouchableOpacity>
-      {/* <Link href="/snapchat/snapStory">
-        <TouchableOpacity>
-          <Image
-            source={icons.user}
-            style={{ width: 40, height: 40, marginTop: 15, marginLeft: 10 }}
-            resizeMode='contain'
-          />
-        </TouchableOpacity>
-      </Link> */}
+
     </View>
   )
 }

@@ -64,10 +64,10 @@ const Home = () => {
               className="w-full h-[210px]"
               resizeMode="contain"
             />
-            <Text className="text-center font-pbold text-3xl text-secondary-100">
+            <Text className="text-center font-bold text-3xl text-secondary-100">
               NEW & TRENDING
             </Text>
-            <Text className="text-center font-psemibold text-sm text-primary">
+            <Text className="text-center font-semibold text-sm text-primary">
               Shop Now
             </Text>
             <Image

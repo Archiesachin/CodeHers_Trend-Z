@@ -8,6 +8,7 @@ import CustomButton from '../components/CustomButton';
 
 
 
+
 export default function App() {
   return (
     <SafeAreaView className = "h-full">
