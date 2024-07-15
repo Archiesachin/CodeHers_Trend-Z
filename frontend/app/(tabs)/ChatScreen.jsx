@@ -99,16 +99,16 @@ const ChatScreen = () => {
   return (
     <View className="flex-1">
       <View className="w-full h-full bg-secondary-100 px-4 py-6 flex-[0.2] -mt-2 flex-row">
-      <View className="flex-row mt-8">
-      <TouchableOpacity onPress={() => navigation.goBack()}>
+        <View className="flex-row mt-8">
+          <TouchableOpacity onPress={() => navigation.goBack()}>
             <MaterialIcons name="chevron-left" size={32} color={"#fff"} />
           </TouchableOpacity>
           <View className="pl-4">
-          <View className="w-12 h-12 rounded-full border border-white flex items-center justify-center">
+            <View className="w-12 h-12 rounded-full border border-white flex items-center justify-center">
               <FontAwesome5 name="users" size={24} color="#fbfbfb" />
             </View>
-        <Text className="text-lg font-bold text-white">{room.chatName}</Text>
-        </View>
+            <Text className="text-lg font-bold text-white">{room.chatName}</Text>
+          </View>
         </View>
       </View>
 
@@ -136,6 +136,9 @@ const ChatScreen = () => {
                               : "flex-start",
                         }}
                       >
+                        <Text className="text-sm font-semibold text-gray-700 mb-1">
+                          {msg.user.displayName || msg.user.email}
+                        </Text>
                         <View
                           className={`px-4 py-2 rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl ${
                             msg.user.providerData.email === user.providerData.email

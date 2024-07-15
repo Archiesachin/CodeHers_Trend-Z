@@ -1,12 +1,14 @@
 import React, {useState, useEffect} from 'react';
-import { Text, View, FlatList, Image, ScrollView } from 'react-native';
+import { Text, View, FlatList, Image, ScrollView , TouchableOpacity} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { icons, images } from '../../constants';
 import Searchinput from '../../components/Searchinput';
 import ProductList from '../../components/interest'
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router, useRouter } from 'expo-router';
 
 const Home = () => {
+  const router = useRouter()
   const [tags, setTags] = useState(["summer"]);
 
   useEffect(() => {
@@ -44,20 +46,20 @@ const Home = () => {
                 className="w-[20px] h-[23px]"
               />
             </View>
-            <View className="mt-1.5">
+            <TouchableOpacity className="mt-1.5" onPress={() => router.push('/WishList')}>
               <Image
                 source={icons.heart}
                 resizeMode="contain"
                 className="w-[20px] h-[23px]"
               />
-            </View>
-            <View className="mt-1.5">
+            </TouchableOpacity>
+            <TouchableOpacity className="mt-1.5" onPress={() => router.push('/Cart')}>
               <Image
                 source={icons.bag}
                 resizeMode="contain"
                 className="w-[20px] h-[23px]"
               />
-            </View>
+            </TouchableOpacity>
           </View>
 
           <View className="px-6">

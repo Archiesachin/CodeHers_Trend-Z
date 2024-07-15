@@ -199,6 +199,20 @@ const TabsLayout = () => {
           headerShown: false
         }}
       />
+       <Tabs.Screen
+        name="Cart"
+        options={{
+          tabBarButton : () => null,
+          headerShown: false
+        }}
+      />
+      <Tabs.Screen
+        name="WishList"
+        options={{
+          tabBarButton : () => null,
+          headerShown: false
+        }}
+      />
     </Tabs>
   );
 };
