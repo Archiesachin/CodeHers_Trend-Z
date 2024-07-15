@@ -18,7 +18,7 @@ const ProductList = ({ tags }) => {
     const fetchProducts = async () => {
       try {
         const response = await fetch(
-          "https://a4a0-103-115-21-157.ngrok-free.app/interest",
+          "https://8bdd-103-115-21-157.ngrok-free.app/interest",
           {
             method: "POST",
             headers: {

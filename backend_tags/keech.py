@@ -23,8 +23,8 @@ CORS(app)
 conn = http.client.HTTPSConnection("instagram-scraper-api2.p.rapidapi.com")
 # Set the headers including your API key
 headers = {
-    "x-rapidapi-key": "94a9920c07msh9949fdf221a3a37p183bd1jsnd2c6acf43f92",
-    "x-rapidapi-host": "instagram-scraper-api2.p.rapidapi.com"
+    'x-rapidapi-key': "d2b9f0bae4msha4451d9c477cacdp1b46ccjsn11166d9c2630",
+    'x-rapidapi-host': "instagram-scraper-api2.p.rapidapi.com"
 }
 # Define the list of hashtags and time range
 hashtags_list = ["#fashion", "#trend", "#style", "#genz"]
@@ -114,7 +114,6 @@ def suggest_hashtags_endpoint():
     # Initialize a dictionary to store hashtags for each category
     category_hashtags = defaultdict(Counter)
 
-
     for hashtag in hashtags_list:
         json_data = fetch_hashtag_data(hashtag.lstrip('#'))  
 
@@ -134,7 +133,7 @@ def suggest_hashtags_endpoint():
             continue
 
     # Combine all fashion-related hashtags across categories
-    all_fashion_hashtags = set.union(*[set(counter) for counter in category_hashtags.values()])
+    all_fashion_hashtags = set().union(*[set(counter) for counter in category_hashtags.values()])
 
     # Get the top fashion-related hashtags by count
     top_fashion_hashtags = Counter(all_fashion_hashtags).most_common()
@@ -150,6 +149,7 @@ def suggest_hashtags_endpoint():
     print(hashtags)
     suggested_hashtags = suggest_hashtags(hashtags, num_hashtags=10)
     return jsonify({"suggested_hashtags": suggested_hashtags})
+
 
 
 # Endpoint to scrape products using hashtags
