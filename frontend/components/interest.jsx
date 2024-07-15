@@ -18,7 +18,7 @@ const ProductList = ({ tags }) => {
     const fetchProducts = async () => {
       try {
         const response = await fetch(
-          "https://5d4a-150-242-207-136.ngrok-free.app/scrape",
+          "https://a4a0-103-115-21-157.ngrok-free.app/interest",
           {
             method: "POST",
             headers: {
@@ -45,7 +45,7 @@ const ProductList = ({ tags }) => {
     fetchProducts();
   }, [tags]);
 
-  if (loading) return <Text>LOADING....</Text>;
+  if (loading) return <Text>Loading products based on your interest!</Text>;
   if (error) return <Text>Error: {error.message}</Text>;
 
   return (
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     color: "#777",
   },
   link: {
-    color: "#007BFF",
+    color: "#ff9c01",
     marginTop: 10,
   },
 });
