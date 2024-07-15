@@ -1,34 +1,115 @@
 import { StyleSheet, Text, View, TouchableOpacity, Image } from "react-native";
-import React from "react";
-import { AntDesign } from "@expo/vector-icons";
+import React ,{useState, useEffect} from "react";
+import { AntDesign, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 import {icons} from '../../constants'
 import { useNavigation } from "@react-navigation/native";
+import { doc, getDoc } from 'firebase/firestore';
+import { firebaseAuth, firestoreDB } from '../../config/firebase.config';
+
 
 
 
 const profile = () => {
+
+  const [name, setName] = useState('');
+
+  const [email, setEmail] = useState('');
+
+  const [phoneNumber, setPhoneNumber] = useState('');
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const user = firebaseAuth.currentUser;
+        if (user) {
+          const userDoc = await getDoc(doc(firestoreDB, 'users', user.uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            setName(userData.fullName);
+            setEmail(user.email); // Set email from the authenticated user
+            setPhoneNumber(userData.phoneNumber || ''); // Set phone number if it exists
+          } else {
+            console.log('No such document!');
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch user data:', error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
   const navigation = useNavigation();
+
   return (
+  
     <View>
-    <View className="bg-secondary-100 h-[300px] mt-10" >
-    <View className="flex-row mt-10  justify-between items-center">
-      <TouchableOpacity onPress={() => navigation.goBack()} >
-        <AntDesign name="arrowleft" size={24} color="white" />
-      </TouchableOpacity>
-      <TouchableOpacity >
-        <AntDesign name="setting" size={35} color="white" />
-      </TouchableOpacity>
-      </View>
-    </View>
-    <View className="bg-white rounded-2xl">
-    <Image
-      source={icons.profile}
-      resizeMode="contain"
-      className="w[50px] h[50px] rounded-[50%]"
-    />
+    <View className="bg-secondary-100 h-[250px] py-12 px-2">
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+            <MaterialIcons name="chevron-left" size={32} color={"#fbfbfb"} className="" />
+        </TouchableOpacity>
+        <View className="flex justify-center items-center">
+        <View className="w-[100px] h-[100px] rounded-full flex items-center border-4 border-white mb-4">
+        <Image
+          source={icons.profile}
+          resizeMode="contain"
+          className="w-[85px] h-[85px] rounded-full mt-1"
+        />
+        </View>
+        <Text className="text-3xl font-bold text-white uppercase ">{name}</Text>
+        </View>
 
     </View>
+    <View className="w-full px-4 py-6 ">
+    <View className="flex text-left px-4 py-2 border-b-gray-100 border-b">
+        <Text className="text-black font-bold text-xl">Account Details</Text>
     </View>
+    <View className="flex-row justify-between text-left px-4 py-4 border-b-gray-100 border-b">
+        <Text className="text-black font-bold text-md">Email</Text>
+        <Text className="text-secondary text-md">{email}</Text>
+    </View>
+    <View className="flex-row justify-between text-left px-4 py-4 border-b-gray-100 border-b">
+        <Text className="text-black font-bold text-md">Phone Number</Text>
+        <Text className="text-secondary text-md">{phoneNumber}</Text>
+    </View>
+    <View className="flex-row justify-between text-left px-4 py-4 border-b-gray-100 border-b">
+        <Text className="text-black font-bold text-md">Fashion Snap Score</Text>
+        <View className="flex-row gap-2">
+        <Text className="text-black text-md mt-2">10</Text>
+        <FontAwesome5 name="fire" size={24} color="#555" />
+        </View>
+    </View>
+    </View>
+
+    <View className="justify-between items-start flex-row px-6 mt-4 ">
+            <View className="w-[150px] h-[50px] border-2 border-gray-100 items-center justify-center">
+              <Text className="font-bold text-center text-secondary-100">
+                Cart
+              </Text>
+            </View>
+            <View className="w-[150px] h-[50px] border-2 border-gray-100 items-center justify-center">
+              <Text className="font-bold text-center text-secondary-100">
+                Orders
+              </Text>
+            </View>
+          </View>
+
+          <View className="justify-between items-start flex-row px-6 mt-4 ">
+            <View className="w-[150px] h-[50px] border-2 border-gray-100 items-center justify-center">
+              <Text className="font-bold text-center text-secondary-100">
+                Offers
+              </Text>
+            </View>
+            <View className="w-[150px] h-[50px] border-2 border-gray-100 items-center justify-center">
+              <Text className="font-bold text-center text-secondary-100">
+                Collect and redeem
+              </Text>
+            </View>
+          </View>
+
+    </View>
+
+  
   )
 }
 

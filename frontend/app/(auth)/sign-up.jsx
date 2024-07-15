@@ -16,6 +16,7 @@ const SignUp = () => {
   const [form, setForm] = useState({ show: '' });
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
+  const [number, setNumber] = useState();
   const [password, setPassword] = useState('');
   const [getEmailValidationStatus, setGetEmailValidationStatus] = useState(false);
 
@@ -40,6 +41,7 @@ const SignUp = () => {
         const data = {
           _id : userCred?.user.uid,
           fullName : name,
+          phoneNumber: number,
           providerData : userCred.user.providerData[0]
           
         }  
@@ -75,6 +77,12 @@ const SignUp = () => {
             isPass={false}
             setStatValue={setEmail}
             setGetEmailValidationStatus={setGetEmailValidationStatus}
+          />
+
+        <UserTextInput
+            placeholder="Phone Number"
+            isPass={false}
+            setStatValue={setNumber}
           />
 
           <UserTextInput
