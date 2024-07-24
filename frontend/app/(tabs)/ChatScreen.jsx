@@ -10,7 +10,7 @@ import {
   Image,
 } from "react-native";
 import React, { useLayoutEffect, useRef, useState } from "react";
-import { Entypo, FontAwesome, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
+import { Entypo, FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
   addDoc,
@@ -78,7 +78,7 @@ const ChatScreen = () => {
       timeStamp: timeStamp,
       message: message,
       user: user,
-      image: imageUrl || image, // Include image if available
+      image: imageUrl || null, // Include image if available
     };
 
     setMessage("");
@@ -104,9 +104,6 @@ const ChatScreen = () => {
             <MaterialIcons name="chevron-left" size={32} color={"#fff"} />
           </TouchableOpacity>
           <View className="pl-4">
-            <View className="w-12 h-12 rounded-full border border-white flex items-center justify-center">
-              <FontAwesome5 name="users" size={24} color="#fbfbfb" />
-            </View>
             <Text className="text-lg font-bold text-white">{room.chatName}</Text>
           </View>
         </View>
@@ -131,17 +128,14 @@ const ChatScreen = () => {
                       <View
                         style={{
                           alignSelf:
-                            msg.user.providerData.email === user.providerData.email
+                            msg.user?.providerData?.email === user?.providerData?.email
                               ? "flex-end"
                               : "flex-start",
                         }}
                       >
-                        <Text className="text-sm font-semibold text-gray-700 mb-1">
-                          {msg.user.displayName || msg.user.email}
-                        </Text>
                         <View
                           className={`px-4 py-2 rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl ${
-                            msg.user.providerData.email === user.providerData.email
+                            msg.user?.providerData?.email === user?.providerData?.email
                               ? "bg-primary"
                               : "bg-gray-200"
                           } w-auto relative`}
