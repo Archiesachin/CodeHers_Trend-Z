@@ -7,6 +7,7 @@ import ProductList from '../../components/interest'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, useRouter } from 'expo-router';
 
+
 const Home = () => {
   const router = useRouter()
   const [tags, setTags] = useState(["summer"]);
@@ -108,6 +109,41 @@ const Home = () => {
           </View>
 
         <ProductList tags={tags}/>
+
+        <View className="px-4 py-4 flex-row justify-center ">
+        <TouchableOpacity className="pr-4 justify-center flex items-center">
+          <Image
+            source={images.bottom}
+            resizeMode='contain'
+            className="w-[70px] h-[70px] rounded-full border-2 border-secondary-100"
+          />
+          <Text className="text-secondary-100 font-bold text-md">Pants</Text>
+        </TouchableOpacity>
+        <TouchableOpacity className="pr-4 justify-center flex items-center">
+          <Image
+            source={images.top}
+            resizeMode='contain'
+            className="w-[70px] h-[70px] rounded-full border-2 border-secondary-100"
+          />
+          <Text className="text-secondary-100 font-bold text-md">Tops</Text>
+        </TouchableOpacity>
+        <TouchableOpacity className="pr-4 justify-center flex items-center">
+          <Image
+            source={images.jacket}
+            resizeMode='contain'
+            className="w-[70px] h-[70px] rounded-full border-2 border-secondary-100"
+          />
+          <Text className="text-secondary-100 font-bold text-md">Jackets</Text>
+        </TouchableOpacity>
+        <TouchableOpacity className="pr-4 justify-center flex items-center">
+          <Image
+            source={images.sandals}
+            resizeMode='contain'
+            className="w-[70px] h-[70px] rounded-full border-2 border-secondary-100"
+          />
+          <Text className="text-secondary-100 font-bold text-md">Shoes</Text>
+        </TouchableOpacity>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
