@@ -1,41 +1,77 @@
-import { View } from 'react-native'
-import React, { useRef, useState } from 'react'
-import { CameraView } from 'expo-camera'
-import BottomRowTools from '../../components/BottomRowTools'
-import MainRowActions from '../../components/MainRowActions'
-import PictureView from '../../components/PictureView'
-import { useRouter } from 'expo-router'
-import { TouchableOpacity, Image } from 'react-native'
-import { icons } from '../../constants'
-import {  ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '../../config/firebase.config';
+import { View } from 'react-native';
+import React, { useRef, useState, useEffect } from 'react';
+import { CameraView } from 'expo-camera';
+import BottomRowTools from '../../components/BottomRowTools';
+import MainRowActions from '../../components/MainRowActions';
+import PictureView from '../../components/PictureView';
+import { useRouter } from 'expo-router';
+import { TouchableOpacity, Image } from 'react-native';
+import { icons } from '../../constants';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage, firebaseAuth, firestoreDB } from '../../config/firebase.config';
+import { doc, updateDoc, increment , getDoc} from 'firebase/firestore';
+
 
 const Snapchat = () => {
-  const router = useRouter()
-  const cameraRef = useRef(null)
-  const [cameraMode, setCameraMode] = useState('picture')
-  const [picture, setPicture] = useState("")
+  const router = useRouter();
+  const cameraRef = useRef(null);
+  const [cameraMode, setCameraMode] = useState('picture');
+  const [picture, setPicture] = useState("");
+  const [accountName, setAccountName] = useState("");
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const user = firebaseAuth.currentUser;
+        if (user) {
+          const userDoc = await getDoc(doc(firestoreDB, 'users', user.uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            setAccountName(userData.fullName || "Default User");
+          } else {
+            console.log("No such user document!");
+            setAccountName("Default User");
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch user data:', error);
+      }
+    };
+  
+    fetchUserData();
+  }, []);
 
   async function handleTakePicture() {
-    const response = await cameraRef.current?.takePictureAsync({});
-    console.log(response.uri);
-    setPicture(response.uri);
+    if (cameraRef.current) {
+      const response = await cameraRef.current.takePictureAsync({});
+      console.log(response.uri);
+      setPicture(response.uri);
+    }
   }
-  
 
-  
   const handleShare = async () => {
     if (picture) {
       try {
         const response = await fetch(picture);
         const blob = await response.blob();
-
         const storageRef = ref(storage, `images/${Date.now()}.jpg`);
-        await uploadBytes(storageRef, blob);
-
+    
+        await uploadBytes(storageRef, blob, {
+          customMetadata: { accountName }, // Add metadata with the user's full name
+        });
+    
         const downloadURL = await getDownloadURL(storageRef);
         console.log("Image uploaded successfully:", downloadURL);
-
+  
+        // Update the snapScore
+        const user = firebaseAuth.currentUser;
+        if (user) {
+          const userRef = doc(firestoreDB, 'users', user.uid);
+          await updateDoc(userRef, {
+            snapScore: increment(1) // Increment snapScore by 1
+          });
+        }
+  
         router.push({
           pathname: '/snapStory',
           params: { pictureUri: downloadURL },
@@ -47,9 +83,8 @@ const Snapchat = () => {
     } else {
       alert("No picture to share.");
     }
-  }; 
-
-
+  };
+  
   if (picture) return <PictureView picture={picture} setPicture={setPicture} handleShare={handleShare}/>
 
   return (
@@ -67,4 +102,4 @@ const Snapchat = () => {
   )
 }
 
-export default Snapchat
+export default Snapchat;

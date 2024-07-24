@@ -24,6 +24,7 @@ import {
 import { firestoreDB } from "../../config/firebase.config";
 import { useSelector } from "react-redux";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { icons } from '../../constants';
 
 const ChatScreen = () => {
   const route = useRoute();
@@ -78,7 +79,7 @@ const ChatScreen = () => {
       timeStamp: timeStamp,
       message: message,
       user: user,
-      image: imageUrl || null, // Include image if available
+      image: imageUrl || null, 
     };
 
     setMessage("");
@@ -124,27 +125,52 @@ const ChatScreen = () => {
               ) : (
                 <>
                   {messages?.map((msg, i) => (
-                    <View key={i} className="m-1">
-                      <View
-                        style={{
-                          alignSelf:
-                            msg.user?.providerData?.email === user?.providerData?.email
-                              ? "flex-end"
-                              : "flex-start",
-                        }}
-                      >
+                    <View
+                      key={i}
+                      className="m-1 flex-row"
+                      style={{
+                        alignSelf:
+                          msg.user?.providerData?.email === user?.providerData?.email
+                            ? "flex-end"
+                            : "flex-start",
+                        flexDirection:
+                          msg.user?.providerData?.email === user?.providerData?.email
+                            ? "row-reverse"
+                            : "row",
+                      }}
+                    >
+                      {msg.user?.providerData?.email !== user?.providerData?.email && (
+                        <Image
+                          source={icons.profile}
+                          style={{
+                            width: 30,
+                            height: 30,
+                            borderRadius: 15,
+                            marginLeft:
+                              msg.user?.providerData?.email === user?.providerData?.email
+                                ? 8
+                                : 0,
+                            marginRight:
+                              msg.user?.providerData?.email !== user?.providerData?.email
+                                ? 8
+                                : 0,
+                          }}
+                        />
+                      )}
+                      <View>
+                        <Text className="text-[12px] text-black font-semibold">
+                          {msg.user?.fullName || "Unknown"}
+                        </Text>
                         <View
                           className={`px-4 py-2 rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl ${
                             msg.user?.providerData?.email === user?.providerData?.email
-                              ? "bg-primary"
+                              ? "bg-secondary"
                               : "bg-gray-200"
                           } w-auto relative`}
                         >
-                          {msg.message && (
-                            <Text className="text-base font-semibold text-white">
-                              {msg.message}
-                            </Text>
-                          )}
+                          <Text className="text-base font-semibold text-black">
+                            {msg.message}
+                          </Text>
                           {msg.image && (
                             <Image
                               source={{ uri: msg.image }}
@@ -156,7 +182,7 @@ const ChatScreen = () => {
                           {msg?.timeStamp?.seconds && (
                             <Text className="text-[12px] text-black font-semibold">
                               {new Date(
-                                parseInt(msg?.timeStamp?.seconds) * 1000
+                                msg?.timeStamp?.seconds * 1000
                               ).toLocaleTimeString("en-US", {
                                 hour: "numeric",
                                 minute: "numeric",

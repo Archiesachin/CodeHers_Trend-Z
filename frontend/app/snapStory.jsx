@@ -1,53 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { View, FlatList, Modal, TouchableOpacity, Image, Text, Alert } from 'react-native';
-import { getDoc, doc } from 'firebase/firestore';
-import { ref, getDownloadURL, listAll } from 'firebase/storage';
-import { firestoreDB, storage } from '../config/firebase.config'; 
-import { firebaseAuth } from '../config/firebase.config'; 
-import {icons} from '../constants'
-import {MaterialIcons} from "@expo/vector-icons";
-import { useNavigation} from "@react-navigation/native";
+import { ref, getDownloadURL, listAll, getMetadata } from 'firebase/storage';
+import { storage } from '../config/firebase.config';
+import { useNavigation } from "@react-navigation/native";
+import { MaterialIcons } from "@expo/vector-icons";
+import { icons } from '../constants';
 
 const SnapStory = () => {
-  const [accountName, setAccountName] = useState('');
   const [data, setData] = useState([]);
   const navigation = useNavigation();
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const user = firebaseAuth.currentUser;
-        if (user) {
-          const userDoc = await getDoc(doc(firestoreDB, 'users', user.uid));
-          if (userDoc.exists()) {
-            setAccountName(userDoc.data().fullName);
-          } else {
-            console.log('No such document!');
-          }
-        }
-      } catch (error) {
-        console.error('Failed to fetch user data:', error);
-      }
-    };
-
-    fetchUserData();
-  }, []);
 
   useEffect(() => {
     const fetchImages = async () => {
       try {
         const storageRef = ref(storage, 'images/');
         const imagesList = await listAll(storageRef);
-        const imagePromises = imagesList.items.map((imageRef) => getDownloadURL(imageRef));
+        const imagePromises = imagesList.items.map(async (imageRef) => {
+          const url = await getDownloadURL(imageRef);
+          const metadata = await getMetadata(imageRef);
+          return {
+            id: imageRef.name,
+            pictureUri: url,
+            accountName: metadata.customMetadata?.accountName || "Default User", // Retrieve account name from metadata
+          };
+        });
 
-        const imageUrls = await Promise.all(imagePromises);
-
-        const imageData = imageUrls.map((url, index) => ({
-          id: (index + 1).toString(),
-          pictureUri: url,
-          accountName: accountName || "Default User", // Use default if account name not fetched yet
-        }));
-
+        const imageData = await Promise.all(imagePromises);
         setData(imageData);
       } catch (error) {
         console.error("Error fetching images:", error);
@@ -55,7 +33,7 @@ const SnapStory = () => {
     };
 
     fetchImages();
-  }, [accountName]);
+  }, []);
 
   const [selectedItem, setSelectedItem] = useState(null);
 
@@ -82,7 +60,7 @@ const SnapStory = () => {
           borderBottomLeftRadius: 8,
           borderBottomRightRadius: 8,
         }}>
-          <Text className="text-xl font-bold text-white">{item.accountName}</Text>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: 'white' }}>{item.accountName}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -94,20 +72,19 @@ const SnapStory = () => {
 
   return (
     <View style={{ flex: 1, padding: 4, marginTop: 40 }}>
-    <View className="flex-row items-center justify-between p-2 mb-4">
-    <TouchableOpacity onPress={() => navigation.goBack()}>
-            <MaterialIcons name="chevron-left" size={32} color={"#000"} />
-          </TouchableOpacity>
-          <Text className="font-bold text-2xl uppercase text-secondary-100">Fashion Snap</Text>
-      <View>
-      <Image
-        source={icons.profile}
-        className="rounded-3xl w-[35px] h-[35px] mt-2"
-        resizeMode='contain'
-      />
-      <Text className="font-bold text-secondary-100 text-[15px]">{accountName}</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 8, marginBottom: 16 }}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <MaterialIcons name="chevron-left" size={32} color={"#000"} />
+        </TouchableOpacity>
+        <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#333' }}>Fashion Snap</Text>
+        <View>
+          <Image
+            source={icons.profile}
+            style={{ width: 35, height: 35, borderRadius: 17.5 }}
+            resizeMode='contain'
+          />
+        </View>
       </View>
-    </View>
 
       <FlatList
         data={data}
@@ -121,7 +98,6 @@ const SnapStory = () => {
         <TouchableOpacity style={{ flex: 1 }} onPress={handleCloseModal}>
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.8)' }}>
             <View style={{ width: '80%', height: '80%', backgroundColor: '#333333', borderRadius: 8 }}>
-              
               <Image
                 source={{ uri: selectedItem?.pictureUri }}
                 style={{ width: '100%', height: '100%', borderRadius: 8 }}

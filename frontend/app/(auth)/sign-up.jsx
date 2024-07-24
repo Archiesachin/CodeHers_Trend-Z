@@ -35,23 +35,24 @@ const SignUp = () => {
     storeShowInAsyncStorage();
   }, [form.show]);
 
-  const handleSignUp = async()=>{
-    if(getEmailValidationStatus && email !== ""){
-      await createUserWithEmailAndPassword(firebaseAuth, email, password).then((userCred) =>{
+  const handleSignUp = async () => {
+    if (getEmailValidationStatus && email !== "") {
+      await createUserWithEmailAndPassword(firebaseAuth, email, password).then((userCred) => {
         const data = {
-          _id : userCred?.user.uid,
-          fullName : name,
+          _id: userCred?.user.uid,
+          fullName: name,
           phoneNumber: number,
-          providerData : userCred.user.providerData[0]
-          
-        }  
-        setDoc(doc(firestoreDB, 'users', userCred?.user.uid), data).then(() =>{
-          router.push('/sign-in')
-        })
-      }
-      );
+          providerData: userCred.user.providerData[0],
+          snapScore: 0 // Initialize snapScore
+        };
+        setDoc(doc(firestoreDB, 'users', userCred?.user.uid), data).then(() => {
+          router.push('/sign-in');
+        });
+      });
     }
-  }
+  };
+  
+  
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
