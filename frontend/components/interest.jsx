@@ -7,9 +7,12 @@ import {
   FlatList,
   StyleSheet,
   Linking,
+  TouchableOpacity,
 } from "react-native";
+import { useRouter } from "expo-router";
 
 const ProductList = ({ tags }) => {
+  const router = useRouter();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -18,7 +21,7 @@ const ProductList = ({ tags }) => {
     const fetchProducts = async () => {
       try {
         const response = await fetch(
-          "https://8bdd-103-115-21-157.ngrok-free.app/interest",
+          "https://69a5-210-16-113-136.ngrok-free.app/interest",
           {
             method: "POST",
             headers: {
@@ -48,21 +51,30 @@ const ProductList = ({ tags }) => {
   if (loading) return <Text>Loading products based on your interest!</Text>;
   if (error) return <Text>Error: {error.message}</Text>;
 
+  const handleProductPress = (item) => {
+    router.push({
+      pathname: "/ProductDetailScreen",
+      params: { product: JSON.stringify(item) },
+    });
+  };
+
   return (
     <FlatList
-    horizontal
-    showsHorizontalScrollIndicator={false}
+      horizontal
+      showsHorizontalScrollIndicator={false}
       data={products}
       keyExtractor={(item) => item.url}
       renderItem={({ item }) => (
-        <View style={styles.productCard}>
-          <Image source={{ uri: item.image }} style={styles.image} />
-          <Text style={styles.productName}>{item.name}</Text>
-          <Text style={styles.productPrice}>Price: {item.price}</Text>
-          <Text style={styles.link} onPress={() => Linking.openURL(item.url)}>
-            View Product
-          </Text>
-        </View>
+        <TouchableOpacity onPress={() => handleProductPress(item)}>
+          <View style={styles.productCard}>
+            <Image source={{ uri: item.image }} style={styles.image} />
+            <Text style={styles.productName}>{item.name}</Text>
+            <Text style={styles.productPrice}>Price: {item.price}</Text>
+            <Text style={styles.link} onPress={() => Linking.openURL(item.url)}>
+              View Product
+            </Text>
+          </View>
+        </TouchableOpacity>
       )}
     />
   );

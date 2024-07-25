@@ -152,7 +152,7 @@ const TabsLayout = () => {
         name="interest"
         options={{
           headerShown: false,
-          tabBarButton : () => null,
+          tabBarButton: () => null,
         }}
       />
       <Tabs.Screen
@@ -173,7 +173,7 @@ const TabsLayout = () => {
       <Tabs.Screen
         name="profile"
         options={{
-          title: name || 'Profile',
+          title: name || "Profile",
           headerShown: false,
           tabBarIcon: ({ color, focused }) => (
             <TabIcon
@@ -188,29 +188,36 @@ const TabsLayout = () => {
       <Tabs.Screen
         name="ChatScreen"
         options={{
-          tabBarButton : () => null,
-          headerShown: false
+          tabBarButton: () => null,
+          headerShown: false,
         }}
       />
       <Tabs.Screen
         name="RoomSelectionModal"
         options={{
-          tabBarButton : () => null,
-          headerShown: false
+          tabBarButton: () => null,
+          headerShown: false,
         }}
       />
-       <Tabs.Screen
+      <Tabs.Screen
         name="Cart"
         options={{
-          tabBarButton : () => null,
-          headerShown: false
+          tabBarButton: () => null,
+          headerShown: false,
         }}
       />
       <Tabs.Screen
         name="WishList"
         options={{
-          tabBarButton : () => null,
-          headerShown: false
+          tabBarButton: () => null,
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="ProductDetailScreen"
+        options={{
+          tabBarButton: () => null,
+          headerShown: false,
         }}
       />
     </Tabs>
