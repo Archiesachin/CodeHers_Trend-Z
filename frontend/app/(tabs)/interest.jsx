@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { SafeAreaView, View, Text, StyleSheet, TextInput } from "react-native";
-import ProductList from "../../components/interest";
+import ProductList from "../../components/ProductList";
 
 const App = () => {
   const [tags, setTags] = useState(["summer"]); 

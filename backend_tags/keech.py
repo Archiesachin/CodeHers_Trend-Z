@@ -273,11 +273,11 @@ def scrape_products():
                             
                             if product_name and product_url and price and image_url:
                                 all_products.append({
-                                    'Hashtag': hashtag,
-                                    'Product Name': product_name,
-                                    'URL': product_url,
-                                    'Price': price,
-                                    'Image URL': image_url
+                                    'hashtag': hashtag,
+                                    'name': product_name,
+                                    'url': product_url,
+                                    'price': price,
+                                    'image': image_url
                                 })
                         except Exception as e:
                             print(f"Error extracting data for an element on getketch.com: {e}")
@@ -286,6 +286,11 @@ def scrape_products():
                 print(f"An error occurred while processing the hashtag #{hashtag} on {base_url}: {e}")
 
     driver.quit()
+    df = pd.DataFrame(all_products)
+    csv_filename = 'trends_data.csv'
+    df.to_csv(csv_filename, index=False)
+
+    print(f"Data saved to {csv_filename}")
     return jsonify({"products": all_products})
 
 

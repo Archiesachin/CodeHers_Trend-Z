@@ -8,14 +8,17 @@ import {
   StyleSheet,
   Linking,
   ScrollView,
+  TouchableOpacityComponent,
 } from "react-native";
 import { getHashtags, scrapeProducts } from "../../api";
+import { useRouter } from "expo-router";
 
 export default function Trends() {
   const [hashtags, setHashtags] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const router = useRouter();
 
   const fetchHashtags = async () => {
     try {
@@ -54,26 +57,33 @@ export default function Trends() {
     initializePage();
   }, []);
   const renderHashtag = ({ item }) => (
-    <Text style={styles.hashtag}>#{item}</Text>
+    <Text className="bg-secondary m-0.5 p-1 rounded-xl">#{item}</Text>
   );
-
+   const handleProductPress = (item) => {
+     router.push({
+       pathname: "/ProductDetailScreen",
+       params: { product: JSON.stringify(item) },
+     });
+   };
   const renderProduct = ({ item }) => (
+    <TouchableOpacity onPress={() => handleProductPress(item)}>
     <View style={styles.productCard}>
-      {item["Image URL"] && (
+      {item.image && (
         <Image
-          source={{ uri: item["Image URL"] }}
+          source={{ uri: item.image }}
           style={styles.productImage}
         />
       )}
-      <Text style={styles.productName}>{item["Product Name"]}</Text>
-      <Text style={styles.productPrice}>{item["Price"]}</Text>
+      <Text style={styles.productName}>{item.name}</Text>
+      <Text style={styles.productPrice}>{item.price}</Text>
       <TouchableOpacity
         style={styles.viewProductButton}
-        onPress={() => Linking.openURL(item["URL"])}
+        onPress={() => Linking.openURL(item.url)}
       >
         <Text style={styles.viewProductButtonText}>View Product</Text>
       </TouchableOpacity>
     </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -99,8 +109,8 @@ export default function Trends() {
         data={hashtags}
         renderItem={renderHashtag}
         keyExtractor={(item) => item}
-        vertical
-        showsHorizontalScrollIndicator={false}
+        horizontal
+        showsHorizontalScrollIndicator={true}
       />
 
       <Text style={styles.sectionTitle}>Get the Products:</Text>

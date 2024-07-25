@@ -3,7 +3,7 @@ import { Text, View, FlatList, Image, ScrollView , TouchableOpacity} from 'react
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { icons, images } from '../../constants';
 import Searchinput from '../../components/Searchinput';
-import ProductList from '../../components/interest'
+import ProductList from '../../components/ProductList'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, useRouter } from 'expo-router';
 

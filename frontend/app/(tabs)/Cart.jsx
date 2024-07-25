@@ -48,7 +48,7 @@ const Cart = () => {
       try {
         const parsedProduct =
           typeof newProduct === "string" ? JSON.parse(newProduct) : newProduct;
-        // console.log("Parsed product:", parsedProduct);
+        console.log("Parsed product:", parsedProduct);
         setCartItems((prevItems) => {
           const existingProductIndex = prevItems.findIndex(
             (item) => item.name === parsedProduct.name
@@ -103,13 +103,17 @@ const Cart = () => {
   const renderItem = ({ item, index }) => (
     <View className="flex-row items-center bg-gray-100 p-4 rounded-lg shadow-md mb-4 mx-4">
       <Image
-        source={{ uri: item.image }}
+        source={{ uri: item.image || item["Image URL"] }}
         className="w-20 h-20 mr-4"
         style={styles.image}
       />
       <View className="flex-1">
-        <Text className="text-lg font-semibold">{item.name}</Text>
-        <Text className="text-blue-500 mt-2">{item.price}</Text>
+        <Text className="text-lg font-semibold">
+          {item.name || item["Product Name"]}
+        </Text>
+        <Text className="text-blue-500 mt-2">
+          {item.price || item["Price"]}
+        </Text>
       </View>
       <View className="flex-row items-center justify-between bg-gray-200 p-2 rounded-lg">
         <TouchableOpacity onPress={() => decreaseQuantity(index)}>

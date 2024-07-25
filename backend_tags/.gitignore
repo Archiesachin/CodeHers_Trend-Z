@@ -1,2 +1,4 @@
 venv
 .env
+combined_data.csv
+trends_data.csv
