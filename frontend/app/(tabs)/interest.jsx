@@ -3,7 +3,7 @@ import { SafeAreaView, View, Text, StyleSheet, TextInput } from "react-native";
 import ProductList from "../../components/ProductList";
 
 const App = () => {
-  const [tags, setTags] = useState(["summer"]); 
+  const [tags, setTags] = useState(["Y2K"]); 
 
   const handleInputChange = (text) => {
     const inputTags = text.split(",").map((tag) => tag.trim());

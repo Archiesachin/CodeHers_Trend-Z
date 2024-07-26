@@ -65,6 +65,29 @@ const ProductDetailScreen = () => {
     }
   };
 
+  const addToWishlist = async () => {
+    try{
+    const user = firebaseAuth.currentUser;
+    if (user) {
+      const cartRef = doc(firestoreDB, "Wishlists", user.uid);
+      await setDoc(
+        cartRef,
+        { products: arrayUnion({ ...product, quantity: 1 }) },
+        { merge: true }
+      );
+      alert("Product Added to Wishlist");
+      router.push({
+        pathname: "/WishList",
+        params: { newProduct: JSON.stringify(productData) },
+      });
+    }
+  }
+    catch (error) {
+      console.error("Failed to add to cart:", error);
+      Alert.alert("Error", "Failed to add product to cart");
+    }
+  };
+
   return (
     <ScrollView>
       <View className="flex-1 mb-10">
@@ -74,8 +97,7 @@ const ProductDetailScreen = () => {
               <MaterialIcons name="chevron-left" size={32} color="#fff" />
             </TouchableOpacity>
           </View>
-        </View>
-        <View className="flex justify-center items-center">
+          <View className="flex justify-center items-center">
           <Image
             source={icons.profile}
             resizeMode="contain"
@@ -83,6 +105,8 @@ const ProductDetailScreen = () => {
           />
           <Text className="text-xl font-bold text-white">{name}</Text>
         </View>
+        </View>
+        
         <View className="flex justify-center items-center">
           <Image
             source={{ uri: productData.image }}
@@ -99,16 +123,16 @@ const ProductDetailScreen = () => {
           </Text>
           <View className="flex-row justify-between mt-4 px-2">
             <TouchableOpacity
-              className="bg-gray-100 p-4 rounded-lg flex-1 mr-2"
+              className="bg-gray-100 px-4 rounded-lg flex-1 mr-2 justify-center items-center w-[150px]"
               onPress={addToCart}
             >
-              <Text className="text-secondary-100 font-bold text-center">Buy Now</Text>
+              <Text className="text-secondary-100 font-bold text-center">Add to Cart</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => alert("Added to Wishlist")}
-              className="bg-gray-100 p-4 rounded-lg flex-1 mx-2"
+              onPress={addToWishlist}
+              className="bg-gray-100 px-4 rounded-lg flex mx-2 justify-center items-center text-center"
             >
-              <Text className="text-secondary-100 text-center font-bold">
+              <Text className="text-secondary-100 font-bold">
                 Wishlist
               </Text>
             </TouchableOpacity>

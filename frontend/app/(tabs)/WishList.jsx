@@ -1,105 +1,160 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { doc, getDoc, setDoc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+import { doc, getDoc,setDoc } from 'firebase/firestore';
 import { firebaseAuth, firestoreDB } from '../../config/firebase.config';
+import { useNavigation } from '@react-navigation/native';
+import { MaterialIcons, AntDesign } from '@expo/vector-icons';
 import { icons } from '../../constants';
-import { AntDesign, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
+import { useLocalSearchParams } from "expo-router";
 
-const ProductPage = () => {
-  const product = {
-    id: 'sample-product-1',
-    name: 'Ketch Women Red Self Design Tube Tops',
-    price: 'Rs. 159',
-    image: 'https://getketchadmin.getketch.com/product/8905745950356/660/KHTP000329_1.jpg',
-    description: 'Dazzle and shine in Ketchs Red & Gold Spangled Tube Top. This stunning piece is a celebration of elegance and glamour, adorned with a mesmerizing blend of red and gold spangles.',
-  };
-
-  const navigation = useNavigation();
+const Wishlist = () => {
+  const [wishlistItems, setWishlistItems] = useState([]);
   const [name, setName] = useState('');
+  const navigation = useNavigation();
+  const { newProduct } = useLocalSearchParams();
 
   useEffect(() => {
+    const fetchwishlistItems = async () => {
+      const user = firebaseAuth.currentUser;
+      if (user) {
+        const userWishlistRef = doc(firestoreDB, 'Wishlists', user.uid);
+        const userWishlistDoc = await getDoc(userWishlistRef);
+        if (userWishlistDoc.exists()) {
+          setWishlistItems(userWishlistDoc.data().products);
+        } else {
+          console.log('No Wishlist found for this user!');
+        }
+      }
+    };
     const fetchUserData = async () => {
       try {
         const user = firebaseAuth.currentUser;
         if (user) {
-          const userDoc = await getDoc(doc(firestoreDB, 'users', user.uid));
+          const userDoc = await getDoc(doc(firestoreDB, "users", user.uid));
           if (userDoc.exists()) {
             const userData = userDoc.data();
             setName(userData.fullName);
           } else {
-            console.log('No such document!');
+            console.log("No such document!");
           }
         }
       } catch (error) {
-        console.error('Failed to fetch user data:', error);
+        console.error("Failed to fetch user data:", error);
+      }
+    };
+    fetchwishlistItems();
+    fetchUserData();
+    if (newProduct) {
+      try {
+        const parsedProduct =
+          typeof newProduct === "string" ? JSON.parse(newProduct) : newProduct;
+        console.log("Parsed product:", parsedProduct);
+        setWishlistItems((prevItems) => {
+          const existingProductIndex = prevItems.findIndex(
+            (item) => item.name === parsedProduct.name
+          );
+          if (existingProductIndex !== -1) {
+            const updatedItems = [...prevItems];
+            updatedItems[existingProductIndex].quantity =
+              (updatedItems[existingProductIndex].quantity || 1) + 1;
+            return updatedItems;
+          } else {
+            return [...prevItems, { ...parsedProduct, quantity: 1 }];
+          }
+        });
+      } catch (error) {
+        console.error("Error parsing new product:", error);
+      }
+    }
+  }, [newProduct]);
+  useEffect(() => {
+    const updateFirebaseWishlist = async () => {
+      const user = firebaseAuth.currentUser;
+      if (user) {
+        const userWishlistRef = doc(firestoreDB, "Wishlists", user.uid);
+        await setDoc(userWishlistRef, { products: wishlistItems }, { merge: true });
       }
     };
 
-    fetchUserData();
-  }, []);
+    updateFirebaseWishlist();
+  }, [wishlistItems]);
 
-  const addToCart = async () => {
-    const user = firebaseAuth.currentUser;
-    if (user) {
-      const cartRef = doc(firestoreDB, 'carts', user.uid);
-      await setDoc(cartRef, { products: arrayUnion({ ...product, quantity: 1 }) }, { merge: true });
-      alert('Product Added to Cart');
-      navigation.navigate('Cart');
-    }
+  const increaseQuantity = (index) => {
+    const newWishlistItems = [...wishlistItems];
+    newWishlistItems[index].quantity = (newWishlistItems[index].quantity || 1) + 1;
+    setWishlistItems(newWishlistItems);
   };
 
-  return (
-    <ScrollView>
-    <View className="flex-1 mb-10">
-      <View className="flex-row justify-between items-center mb-4 bg-secondary-100 pt-12 pb-4 px-4">
-        <View className="flex-row items-center">
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <MaterialIcons name="chevron-left" size={32} color="#fff" />
-          </TouchableOpacity>
-        </View>
-        <View className="flex justify-center items-center">
-          <Image
-            source={icons.profile}
-            resizeMode="contain"
-            className="w-8 h-8 rounded-full"
-          />
-          <Text className="text-xl font-bold text-white">{name}</Text>
-        </View>
+  const decreaseQuantity = (index) => {
+    const newWishlistItems = [...wishlistItems];
+    newWishlistItems[index].quantity = (newWishlistItems[index].quantity || 1) - 1;
+    if (newWishlistItems[index].quantity < 1) newWishlistItems[index].quantity = 1;
+    setWishlistItems(newWishlistItems);
+  };
+
+  const removeItem = (index) => {
+    setWishlistItems((prevItems) => {
+      const newItems = [...prevItems];
+      newItems.splice(index, 1);
+      return newItems;
+    });
+  };
+
+  const renderItem = ({ item, index }) => (
+    <View className="flex-row items-center bg-gray-100 p-4 rounded-lg shadow-md mb-4 mx-4">
+      <Image
+        source={{ uri: item.image || item["Image URL"] }}
+        className="w-20 h-20 mr-4"
+        style={styles.image}
+      />
+      <View className="flex-1">
+        <Text className="text-lg font-semibold">
+          {item.name || item["Product Name"]}
+        </Text>
+        <Text className="text-blue-500 mt-2">
+          {item.price || item["Price"]}
+        </Text>
       </View>
-      <View className="flex justify-center items-center">
-        <Image
-          source={{ uri: product.image }}
-          className="w-[300px] h-64 bg-gray-200 mb-4 rounded-lg"
-        />
-      </View>
-      <View className="px-8">
-        <Text className="text-2xl font-bold mb-2">{product.name}</Text>
-        <Text className="text-sm text-gray-700 mb-4">{product.description}</Text>
-      </View>
-      <View className="flex-row justify-between mt-4 px-2">
-        <TouchableOpacity
-          onPress={addToCart}
-          className="bg-gray-100 p-4 rounded-lg flex-1 mr-2"
-        >
-          <Text className="text-secondary-100 font-bold text-center">Add to Cart</Text>
+      <View className="flex-row items-center justify-between bg-gray-200 p-2 rounded-lg">
+        <TouchableOpacity onPress={() => decreaseQuantity(index)}>
+          <AntDesign name="minuscircleo" size={24} color="#000" />
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => alert('Added to Wishlist')}
-          className="bg-gray-100 p-4 rounded-lg flex-1 mx-2"
-        >
-          <Text className="text-secondary-100 text-center font-bold">Wishlist</Text>
+        <Text className="text-lg font-bold mx-2">{item.quantity || 1}</Text>
+        <TouchableOpacity onPress={() => increaseQuantity(index)}>
+          <AntDesign name="pluscircleo" size={24} color="#000" />
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => alert('Try On Feature Coming Soon')}
-          className="bg-gray-100 p-4 rounded-lg flex-1 ml-2"
-        >
-          <Text className="text-secondary-100 text-center font-bold">Try On</Text>
+        <TouchableOpacity onPress={() => removeItem(index)} className="ml-2">
+          <AntDesign name="delete" size={24} color="red" />
         </TouchableOpacity>
       </View>
     </View>
-    </ScrollView>
+  );
+
+  return (
+    <View className="flex-1">
+      <View className="flex-row justify-between items-center mb-4 bg-secondary-100 pt-14 pb-4 px-4">
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <MaterialIcons name="chevron-left" size={32} color="#fff" />
+        </TouchableOpacity>
+        <Text className="text-3xl font-bold text-white">Wishlist</Text>
+      </View>
+      {wishlistItems.length === 0 ? (
+        <Text className="text-center text-lg mt-4">Your Wishlist is empty.</Text>
+      ) : (
+        <FlatList
+          data={wishlistItems}
+          renderItem={renderItem}
+          keyExtractor={(item, index) => index.toString()}
+        />
+      )}
+    </View>
   );
 };
 
-export default ProductPage;
+const styles = StyleSheet.create({
+  image: {
+    resizeMode: 'cover',
+  },
+});
+
+export default Wishlist;

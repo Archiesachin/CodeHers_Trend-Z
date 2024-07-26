@@ -57,7 +57,9 @@ export default function Trends() {
     initializePage();
   }, []);
   const renderHashtag = ({ item }) => (
-    <Text className="bg-secondary m-0.5 p-1 rounded-xl">#{item}</Text>
+    <View className="w-[150px] justify-center text-center flex">
+    <Text className="bg-gray-100 m-2 p-2 rounded-xl text-secondary-100 font-bold">#{item}</Text>
+    </View>
   );
    const handleProductPress = (item) => {
      router.push({
@@ -109,8 +111,9 @@ export default function Trends() {
         data={hashtags}
         renderItem={renderHashtag}
         keyExtractor={(item) => item}
-        horizontal
-        showsHorizontalScrollIndicator={true}
+        numColumns={2}
+        contentContainerStyle={{ flexGrow: 1 }}
+        columnWrapperStyle={{ justifyContent: 'space-around' }}
       />
 
       <Text style={styles.sectionTitle}>Get the Products:</Text>

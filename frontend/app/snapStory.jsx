@@ -91,8 +91,8 @@ const SnapStory = () => {
         keyExtractor={(item) => item.id}
         numColumns={2}
         contentContainerStyle={{ flexGrow: 1 }}
-        renderItem={renderItem}
         columnWrapperStyle={{ justifyContent: 'space-around' }}
+        renderItem={renderItem}
       />
       <Modal visible={!!selectedItem} transparent={true} animationType="slide">
         <TouchableOpacity style={{ flex: 1 }} onPress={handleCloseModal}>

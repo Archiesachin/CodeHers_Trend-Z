@@ -10,7 +10,7 @@ import { router, useRouter } from 'expo-router';
 
 const Home = () => {
   const router = useRouter()
-  const [tags, setTags] = useState(["summer"]);
+  const [tags, setTags] = useState(["Y2K"]);
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -68,49 +68,19 @@ const Home = () => {
           </View>
 
           <View className="justify-between items-start flex-row px-6 ">
-            <View className="w-[150px] h-[30px] border-2 border-gray-100 rounded-2xl items-center justify-center">
+            <TouchableOpacity className="w-[150px] h-[30px] border-2 border-gray-100 rounded-2xl items-center justify-center">
               <Text className="font-bold text-center text-secondary-100">
                 Men
               </Text>
-            </View>
-            <View className="w-[150px] h-[30px] border-2 border-gray-100 rounded-2xl items-center justify-center">
+            </TouchableOpacity>
+            <TouchableOpacity className="w-[150px] h-[30px] border-2 border-gray-100 rounded-2xl items-center justify-center bg-gray-100">
               <Text className="font-bold text-center text-secondary-100">
                 Women
               </Text>
-            </View>
+            </TouchableOpacity>
           </View>
 
-          <View className="">
-            <Image
-              source={images.header}
-              className="w-full h-[210px]"
-              resizeMode="contain"
-            />
-            <Text className="text-center font-bold text-3xl text-secondary-100">
-              NEW & TRENDING
-            </Text>
-            <Text className="text-center text-sm text-primary">
-              Shop Now
-            </Text>
-            <Image
-              source={icons.rightArrow}
-              className="w-[15px] h-[15px] mt-[-18px] ml-[220px]"
-              resizeMode="contain"
-            />
-          </View>
-        </View>
-
-        <View className="justify-start gap-2 items-start flex-row px-2 mb-4">
-            <View className=" h-[30px] border-2 border-gray-100 rounded-2xl items-center justify-center">
-              <Text className="font-bold text-center text-secondary-100 px-4">
-                Since you like: {tags}
-              </Text>
-           </View>
-          </View>
-
-        <ProductList tags={tags}/>
-
-        <View className="px-4 py-4 flex-row justify-center ">
+          <View className="px-4 py-4 flex-row justify-center ">
         <TouchableOpacity className="pr-4 justify-center flex items-center">
           <Image
             source={images.bottom}
@@ -144,6 +114,38 @@ const Home = () => {
           <Text className="text-secondary-100 font-bold text-md">Shoes</Text>
         </TouchableOpacity>
         </View>
+
+          <View className="">
+            <Image
+              source={images.header}
+              className="w-full h-[210px]"
+              resizeMode="contain"
+            />
+            <Text className="text-center font-bold text-3xl text-secondary-100">
+              NEW & TRENDING
+            </Text>
+            <Text className="text-center text-sm text-primary">
+              Shop Now
+            </Text>
+            <Image
+              source={icons.rightArrow}
+              className="w-[15px] h-[15px] mt-[-18px] ml-[220px]"
+              resizeMode="contain"
+            />
+          </View>
+        </View>
+
+        <View className="justify-start gap-2 items-start flex-row px-2 mb-4">
+            <View className=" h-[30px] border-2 border-gray-100 rounded-2xl items-center justify-center">
+              <Text className="font-bold text-center text-secondary-100 px-4">
+                Recommended For You
+              </Text>
+           </View>
+          </View>
+
+        <ProductList tags={tags}/>
+
+        
       </ScrollView>
     </SafeAreaView>
   );
