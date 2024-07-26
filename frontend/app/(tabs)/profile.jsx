@@ -53,7 +53,9 @@ const Profile = () => {
               className="w-[85px] h-[85px] rounded-full mt-1"
             />
           </View>
-          <Text className="text-3xl font-bold text-white uppercase ">{name}</Text>
+          <Text className="text-3xl font-bold text-white uppercase ">
+            {name}
+          </Text>
         </View>
       </View>
       <View className="w-full px-4 py-6">
@@ -69,7 +71,9 @@ const Profile = () => {
           <Text className="text-secondary text-md">{phoneNumber}</Text>
         </View>
         <View className="flex-row justify-between text-left px-4 py-4 border-b-gray-100 border-b">
-          <Text className="text-black font-bold text-md">Fashion Snap Score</Text>
+          <Text className="text-black font-bold text-md">
+            Fashion Snap Score
+          </Text>
           <View className="flex-row gap-2">
             <Text className="text-black text-md mt-2">{snapScore}</Text>
             <FontAwesome5 name="fire" size={24} color="#555" />
@@ -78,12 +82,14 @@ const Profile = () => {
       </View>
 
       <View className="justify-between items-start flex-row px-6 mt-4">
-        <View className="w-[150px] h-[50px] border-2 border-gray-100 items-center justify-center">
-          <Text className="font-bold text-center text-secondary-100">
-            Cart
-          </Text>
-        </View>
-        <View className="w-[150px] h-[50px] border-2 border-gray-100 items-center justify-center">
+        <TouchableOpacity onPress={() => navigation.navigate("Cart")}>
+          <View className="w-[150px] h-[50px] border-2 border-gray-100 rounded-xl items-center justify-center">
+            <Text className="font-bold text-center text-secondary-100">
+              Cart
+            </Text>
+          </View>
+        </TouchableOpacity>
+        <View className="w-[150px] h-[50px] border-2 border-gray-100 rounded-xl items-center justify-center">
           <Text className="font-bold text-center text-secondary-100">
             Orders
           </Text>
@@ -91,12 +97,12 @@ const Profile = () => {
       </View>
 
       <View className="justify-between items-start flex-row px-6 mt-4">
-        <View className="w-[150px] h-[50px] border-2 border-gray-100 items-center justify-center">
+        <View className="w-[150px] h-[50px] border-2 border-gray-100 rounded-xl items-center justify-center">
           <Text className="font-bold text-center text-secondary-100">
             Offers
           </Text>
         </View>
-        <View className="w-[150px] h-[50px] border-2 border-gray-100 items-center justify-center">
+        <View className="w-[150px] h-[50px] border-2 border-gray-100 rounded-xl items-center justify-center">
           <Text className="font-bold text-center text-secondary-100">
             Collect and redeem
           </Text>

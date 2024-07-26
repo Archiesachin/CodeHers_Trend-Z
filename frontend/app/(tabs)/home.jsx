@@ -103,7 +103,7 @@ const Home = () => {
         <View className="justify-start gap-2 items-start flex-row px-2 mb-4">
             <View className=" h-[30px] border-2 border-gray-100 rounded-2xl items-center justify-center">
               <Text className="font-bold text-center text-secondary-100 px-4">
-                Recommended For You
+                Since you like: {tags}
               </Text>
            </View>
           </View>
