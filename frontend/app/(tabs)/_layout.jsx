@@ -220,6 +220,13 @@ const TabsLayout = () => {
           headerShown: false,
         }}
       />
+      <Tabs.Screen
+        name="TryOn"
+        options={{
+          tabBarButton: () => null,
+          headerShown: false,
+        }}
+      />
     </Tabs>
   );
 };

@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { getInterestProducts } from "../api";
 
 const ProductList = ({ tags }) => {
   const router = useRouter();
@@ -18,32 +19,16 @@ const ProductList = ({ tags }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await fetch(
-          "https://cfad-150-242-207-136.ngrok-free.app/interest",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ tags }),
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-
-        const data = await response.json();
-        console.log(data);
-        setProducts(data);
-      } catch (error) {
-        setError(error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchProducts = async () => {
+    try {
+      const data = await getInterestProducts(tags);
+      setProducts(data);
+    } catch (error) {
+      setError(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
     fetchProducts();
   }, [tags]);

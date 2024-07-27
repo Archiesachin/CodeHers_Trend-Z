@@ -122,6 +122,7 @@ export default function Trends() {
         renderItem={renderProduct}
         keyExtractor={(item, index) => index.toString()}
         numColumns={2}
+        style={styles.container}
       />
     </ScrollView>
   );

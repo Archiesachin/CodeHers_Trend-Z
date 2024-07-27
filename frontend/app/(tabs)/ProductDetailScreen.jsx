@@ -14,12 +14,15 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { doc, getDoc, setDoc, arrayUnion } from "firebase/firestore";
 import { firebaseAuth, firestoreDB } from "../../config/firebase.config";
 import { icons } from "../../constants";
+import { sendImageUrlToServer, API_URL } from "../../api";
 
 const ProductDetailScreen = () => {
   const router = useRouter();
   const { product } = useLocalSearchParams();
   const productData = JSON.parse(product);
   const [name, setName] = useState("");
+  const [processedImageUrl, setProcessedImageUrl] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -43,48 +46,56 @@ const ProductDetailScreen = () => {
   }, []);
 
   const addToCart = async () => {
-    try{
-    const user = firebaseAuth.currentUser;
-    if (user) {
-      const cartRef = doc(firestoreDB, "carts", user.uid);
-      await setDoc(
-        cartRef,
-        { products: arrayUnion({ ...product, quantity: 1 }) },
-        { merge: true }
-      );
-      alert("Product Added to Cart");
-      router.push({
-        pathname: "/Cart",
-        params: { newProduct: JSON.stringify(productData) },
-      });
-    }
-  }
-    catch (error) {
+    try {
+      const user = firebaseAuth.currentUser;
+      if (user) {
+        const cartRef = doc(firestoreDB, "carts", user.uid);
+        await setDoc(
+          cartRef,
+          { products: arrayUnion({ ...product, quantity: 1 }) },
+          { merge: true }
+        );
+        alert("Product Added to Cart");
+        router.push({
+          pathname: "/Cart",
+          params: { newProduct: JSON.stringify(productData) },
+        });
+      }
+    } catch (error) {
       console.error("Failed to add to cart:", error);
       Alert.alert("Error", "Failed to add product to cart");
     }
   };
 
   const addToWishlist = async () => {
-    try{
-    const user = firebaseAuth.currentUser;
-    if (user) {
-      const cartRef = doc(firestoreDB, "Wishlists", user.uid);
-      await setDoc(
-        cartRef,
-        { products: arrayUnion({ ...product, quantity: 1 }) },
-        { merge: true }
-      );
-      alert("Product Added to Wishlist");
-      router.push({
-        pathname: "/WishList",
-        params: { newProduct: JSON.stringify(productData) },
-      });
-    }
-  }
-    catch (error) {
+    try {
+      const user = firebaseAuth.currentUser;
+      if (user) {
+        const cartRef = doc(firestoreDB, "Wishlists", user.uid);
+        await setDoc(
+          cartRef,
+          { products: arrayUnion({ ...product, quantity: 1 }) },
+          { merge: true }
+        );
+        alert("Product Added to Wishlist");
+        router.push({
+          pathname: "/WishList",
+          params: { newProduct: JSON.stringify(productData) },
+        });
+      }
+    } catch (error) {
       console.error("Failed to add to cart:", error);
       Alert.alert("Error", "Failed to add product to cart");
+    }
+  };
+  const handleTryOn = async () => {
+    setIsLoading(true);
+    const imageUrl = await sendImageUrlToServer(productData.image);
+    setIsLoading(false);
+    if (imageUrl) {
+      setProcessedImageUrl(imageUrl);
+      console.log(`${imageUrl}`);
+      console.log(`${API_URL}${imageUrl}`);
     }
   };
 
@@ -98,15 +109,15 @@ const ProductDetailScreen = () => {
             </TouchableOpacity>
           </View>
           <View className="flex justify-center items-center">
-          <Image
-            source={icons.profile}
-            resizeMode="contain"
-            className="w-8 h-8 rounded-full"
-          />
-          <Text className="text-xl font-bold text-white">{name}</Text>
+            <Image
+              source={icons.profile}
+              resizeMode="contain"
+              className="w-8 h-8 rounded-full"
+            />
+            <Text className="text-xl font-bold text-white">{name}</Text>
+          </View>
         </View>
-        </View>
-        
+
         <View className="flex justify-center items-center">
           <Image
             source={{ uri: productData.image }}
@@ -126,25 +137,37 @@ const ProductDetailScreen = () => {
               className="bg-gray-100 px-4 rounded-lg flex-1 mr-2 justify-center items-center w-[150px]"
               onPress={addToCart}
             >
-              <Text className="text-secondary-100 font-bold text-center">Add to Cart</Text>
+              <Text className="text-secondary-100 font-bold text-center">
+                Add to Cart
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={addToWishlist}
               className="bg-gray-100 px-4 rounded-lg flex mx-2 justify-center items-center text-center"
             >
-              <Text className="text-secondary-100 font-bold">
-                Wishlist
-              </Text>
+              <Text className="text-secondary-100 font-bold">Wishlist</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => alert("Try On Feature Coming Soon")}
+              onPress={handleTryOn}
               className="bg-gray-100 p-4 rounded-lg flex-1 ml-2"
+              disabled={isLoading}
             >
               <Text className="text-secondary-100 text-center font-bold">
-                Try On
+                {isLoading ? "Processing..." : "Try On"}
               </Text>
             </TouchableOpacity>
           </View>
+          {processedImageUrl && (
+            <Image
+              source={{ uri: processedImageUrl }}
+              style={{
+                width: 300,
+                height: 300,
+                borderRadius: 10,
+                marginTop: 20,
+              }}
+            />
+          )}
         </View>
       </View>
     </ScrollView>

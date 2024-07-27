@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request,send_file, session
 import http.client
 import json
 from datetime import datetime, timedelta
@@ -15,10 +15,19 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import pandas as pd
 import time
+from gradio_client import Client, handle_file
+from PIL import Image
+import secrets
+import os
+import csv
 
+secret_key = secrets.token_hex(16) 
 app = Flask(__name__)
+app.secret_key = secret_key
 CORS(app)
 
+print(app.secret_key)
+client = Client("levihsu/OOTDiffusion")
 # Establish connection to the API
 conn = http.client.HTTPSConnection("instagram-scraper-api2.p.rapidapi.com")
 # Set the headers including your API key
@@ -32,7 +41,7 @@ input_hashtags = set(tag.lstrip('#') for tag in hashtags_list)  # Remove the '#'
 one_month_ago = datetime.now() - timedelta(days=30)
 
 # List of keywords related to fashion and clothing
-fashion_keywords = ['fashion', 'clothing', 'apparel', 'outfit', 'dress', 'shirt', 'pants', 'jeans', 'skirt', 'shoes', 'accessories']
+fashion_keywords = ['fashion', 'clothing', 'apparel', 'outfit', 'dress', 'shirt', 'pants', 'jeans', 'skirt', 'shoes', 'accessories','tshirt']
 
 # Function to request data for a specific hashtag
 def fetch_hashtag_data(hashtag):
@@ -190,7 +199,7 @@ def scrape_products():
                     wait.until(EC.presence_of_all_elements_located((By.XPATH, "//div[@class='innerer']")))
 
                     # Scroll to load more products
-                    scroll_page(1)  # Adjust the number of scroll attempts as needed
+                   
 
                     # Find all product elements after scrolling
                     product_elements = driver.find_elements(By.XPATH, "//div[@class='innerer']")
@@ -228,7 +237,7 @@ def scrape_products():
                     )
                     
                     # Scroll to load more products
-                    scroll_page(1)  # Adjust the number of scroll attempts as needed
+
                     
                     # Find all product elements
                     product_elements = driver.find_elements(By.XPATH, "//div[contains(@class, 'st-product')]")
@@ -324,7 +333,7 @@ def scrape():
 
                     for product in product_listings:
                         try:
-                            product_name = product.find_element(By.CSS_SELECTOR, 'h3.product-brand').text
+                            product_name = product.find_element(By.CSS_SELECTOR, 'h4.product-product').text
                             product_price = product.find_element(By.CSS_SELECTOR, 'div.product-price > span').text
                             product_url = product.find_element(By.CSS_SELECTOR, 'a').get_attribute('href')
                             product_image = product.find_element(By.CSS_SELECTOR, 'img').get_attribute('src')
@@ -359,6 +368,54 @@ def scrape():
     df_combined.to_csv('combined_data.csv', index=False)
 
     return jsonify(all_products)
+
+@app.route('/try-on', methods=['POST'])
+def try_on():    
+    try:
+        # Fetch the garment image
+        garm_img_url = request.json['garm_img_url']
+        print("Received image URL:", garm_img_url)
+
+        # Process the image using OOTDiffusion
+        result = client.predict(
+            vton_img=handle_file('https://levihsu-ootdiffusion.hf.space/file=/tmp/gradio/2e0cca23e744c036b3905c4b6167371632942e1c/model_1.png'),
+            garm_img=handle_file(garm_img_url),
+            n_samples=1,
+            n_steps=20,
+            image_scale=2,
+            seed=-1,
+            api_name="/process_hd"
+        )
+        print("Processing result:", result)
+        image_path = result[0]['image']
+        with open('image_paths.csv', 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow([image_path])
+        image_filename = os.path.basename(image_path)
+        image_url = f'/get_image/{image_filename}'
+        session['result'] = result
+        return jsonify({
+            'success': True,
+            'message': 'Image processed successfully!',
+            'image_url': image_url
+        }), 200
+    except Exception as e:
+        print(f"Server error: {str(e)}") 
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/get_image/<filename>')
+def get_image(filename):
+    # Read image path from CSV
+    with open('image_paths.csv', 'r') as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            if os.path.basename(row[0]) == filename:
+                image_path = row[0]
+                return send_file(image_path, mimetype='image/webp')
+    return 'Image not found', 404
 
 if __name__ == '__main__':
     app.run(debug=True)
