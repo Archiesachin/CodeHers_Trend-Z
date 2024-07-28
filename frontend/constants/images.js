@@ -10,5 +10,12 @@ import bottom from "../assets/images/botoms.jpg";
 import jacket from "../assets/images/jacket.jpg";
 import sandals from "../assets/images/sandals.jpg";
 import top from "../assets/images/top-1.jpg"
+import barbie from "../assets/images/Barbie Core.png"
+import academia from "../assets/images/academia-core.png"
+import brat from "../assets/images/brat-core.png"
+import goth from "../assets/images/goth-core.png"
+import street from "../assets/images/street-core.png"
+import corporate from "../assets/images/Corporate-core.png"
+import cottage from "../assets/images/cottage-core.png"
 
-export default { profile, thumbnail, cards, path, logo, logoSmall, empty, header, bottom, jacket, sandals, top };
+export default { profile, thumbnail, cards, path, logo, logoSmall, empty, header, bottom, jacket, sandals, top, barbie, academia, brat, goth, street, corporate, cottage };

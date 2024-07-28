@@ -227,6 +227,20 @@ const TabsLayout = () => {
           headerShown: false,
         }}
       />
+      <Tabs.Screen
+        name="Women"
+        options={{
+          tabBarButton: () => null,
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="Men"
+        options={{
+          tabBarButton: () => null,
+          headerShown: false,
+        }}
+      />
     </Tabs>
   );
 };

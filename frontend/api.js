@@ -1,5 +1,5 @@
 // src/api.js
-const API_URL = "https://e149-103-171-118-100.ngrok-free.app"; // Adjust this if your Flask app runs on a different port
+const API_URL = "https://049b-150-242-207-136.ngrok-free.app"; // Adjust this if your Flask app runs on a different port
 
 export const getHashtags = async () => {
   const response = await fetch(`${API_URL}/hashtags`, {

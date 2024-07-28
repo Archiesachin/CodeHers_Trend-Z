@@ -3,3 +3,5 @@ Flask-Cors
 selenium
 webdriver-manager
 pandas
+gradio_client
+Pillow

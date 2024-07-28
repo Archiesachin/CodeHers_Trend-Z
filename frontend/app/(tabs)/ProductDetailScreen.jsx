@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { doc, getDoc, setDoc, arrayUnion } from "firebase/firestore";
+import { doc, getDoc, setDoc, arrayUnion , onSnapshot} from "firebase/firestore";
 import { firebaseAuth, firestoreDB } from "../../config/firebase.config";
 import { icons } from "../../constants";
 import { sendImageUrlToServer, API_URL } from "../../api";
@@ -25,25 +25,29 @@ const ProductDetailScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const user = firebaseAuth.currentUser;
-        if (user) {
-          const userDoc = await getDoc(doc(firestoreDB, "users", user.uid));
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setName(userData.fullName);
+    const fetchUserData = () => {
+      const user = firebaseAuth.currentUser;
+      if (user) {
+        const userDocRef = doc(firestoreDB, 'users', user.uid);
+        const unsubscribe = onSnapshot(userDocRef, (doc) => {
+          if (doc.exists()) {
+            const userData = doc.data();
+            setName(userData.fullName || 'No');
           } else {
-            console.log("No such document!");
+            console.log('No such document!');
           }
-        }
-      } catch (error) {
-        console.error("Failed to fetch user data:", error);
+        }, (error) => {
+          console.error("Error fetching user data:", error);
+        });
+  
+        // Clean up the listener on component unmount
+        return () => unsubscribe();
       }
     };
-
+  
     fetchUserData();
   }, []);
+  
 
   const addToCart = async () => {
     try {
@@ -126,12 +130,10 @@ const ProductDetailScreen = () => {
         </View>
         <View className="px-8">
           <Text className="text-2xl font-bold mb-2">{productData.name}</Text>
-          <Text className="text-sm text-gray-700 mb-4">
-            Price: {productData.price}
+          <Text className="text-md text-gray-700 mb-4 font-bold">
+            Price: Rs.{productData.price}
           </Text>
-          <Text className="text-sm text-gray-700 mb-4">
-            {productData.description || "No description available."}
-          </Text>
+          
           <View className="flex-row justify-between mt-4 px-2">
             <TouchableOpacity
               className="bg-gray-100 px-4 rounded-lg flex-1 mr-2 justify-center items-center w-[150px]"

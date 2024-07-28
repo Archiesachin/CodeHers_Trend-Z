@@ -137,6 +137,14 @@ const Cart = () => {
           <MaterialIcons name="chevron-left" size={32} color="#fff" />
         </TouchableOpacity>
         <Text className="text-3xl font-bold text-white">Cart</Text>
+        <View className="flex justify-center items-center">
+            <Image
+              source={icons.profile}
+              resizeMode="contain"
+              className="w-8 h-8 rounded-full"
+            />
+            <Text className="text-xl font-bold text-white">{name}</Text>
+          </View>
       </View>
       {cartItems.length === 0 ? (
         <Text className="text-center text-lg mt-4">Your cart is empty.</Text>

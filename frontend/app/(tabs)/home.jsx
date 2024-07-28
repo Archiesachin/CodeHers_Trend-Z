@@ -1,16 +1,26 @@
-import React, {useState, useEffect} from 'react';
-import { Text, View, FlatList, Image, ScrollView , TouchableOpacity} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useState, useEffect } from 'react';
+import { SafeAreaView, ScrollView, View, Text, Image, TouchableOpacity } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
 import { icons, images } from '../../constants';
 import Searchinput from '../../components/Searchinput';
-import ProductList from '../../components/ProductList'
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router, useRouter } from 'expo-router';
+import ProductList from '../../components/ProductList';
+import QuizComponent from '../../components/QuizComponent';
 
 
 const Home = () => {
-  const router = useRouter()
+  const router = useRouter();
   const [tags, setTags] = useState(["Y2K"]);
+  const [selected, setSelected] = useState('');
+
+  const handlePress = (category) => {
+    setSelected(category);
+    if (category === 'Men') {
+      router.push('/Men');
+    } else {
+      router.push('/Women');
+    }
+  };
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -30,13 +40,13 @@ const Home = () => {
   return (
     <SafeAreaView>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View className="my-6 space-y-6">
+        <View className="my-10 space-y-6">
           <View className="justify-between items-start flex-row px-6 mb-2">
             <View>
               <Text className="font-bold text-md text-secondary-100">
                 Welcome Back
               </Text>
-              <Text className=" text-2xl font-bold text-secondary-100">
+              <Text className="text-2xl font-bold text-secondary-100">
                 Trend-Z
               </Text>
             </View>
@@ -67,53 +77,21 @@ const Home = () => {
             <Searchinput />
           </View>
 
-          <View className="justify-between items-start flex-row px-6 ">
-            <TouchableOpacity className="w-[150px] h-[30px] border-2 border-gray-100 rounded-2xl items-center justify-center">
-              <Text className="font-bold text-center text-secondary-100">
-                Men
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity className="w-[150px] h-[30px] border-2 border-gray-100 rounded-2xl items-center justify-center bg-gray-100">
-              <Text className="font-bold text-center text-secondary-100">
-                Women
-              </Text>
-            </TouchableOpacity>
-          </View>
+          <View className="justify-between items-start flex-row px-6">
+      <TouchableOpacity
+        className={`w-[150px] h-[30px] border-2 border-gray-100 rounded-2xl items-center justify-center`}
+        onPress={() => handlePress('Men')}
+      >
+        <Text className="font-bold text-center text-secondary-100">Men</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        className={`w-[150px] h-[30px] border-2 border-gray-100 rounded-2xl items-center justify-center `}
+        onPress={() => handlePress('Women')}
+      >
+        <Text className="font-bold text-center text-secondary-100">Women</Text>
+      </TouchableOpacity>
+    </View>
 
-          <View className="px-4 py-4 flex-row justify-center ">
-        <TouchableOpacity className="pr-4 justify-center flex items-center">
-          <Image
-            source={images.bottom}
-            resizeMode='contain'
-            className="w-[70px] h-[70px] rounded-full border-2 border-secondary-100"
-          />
-          <Text className="text-secondary-100 font-bold text-md">Pants</Text>
-        </TouchableOpacity>
-        <TouchableOpacity className="pr-4 justify-center flex items-center">
-          <Image
-            source={images.top}
-            resizeMode='contain'
-            className="w-[70px] h-[70px] rounded-full border-2 border-secondary-100"
-          />
-          <Text className="text-secondary-100 font-bold text-md">Tops</Text>
-        </TouchableOpacity>
-        <TouchableOpacity className="pr-4 justify-center flex items-center">
-          <Image
-            source={images.jacket}
-            resizeMode='contain'
-            className="w-[70px] h-[70px] rounded-full border-2 border-secondary-100"
-          />
-          <Text className="text-secondary-100 font-bold text-md">Jackets</Text>
-        </TouchableOpacity>
-        <TouchableOpacity className="pr-4 justify-center flex items-center">
-          <Image
-            source={images.sandals}
-            resizeMode='contain'
-            className="w-[70px] h-[70px] rounded-full border-2 border-secondary-100"
-          />
-          <Text className="text-secondary-100 font-bold text-md">Shoes</Text>
-        </TouchableOpacity>
-        </View>
 
           <View className="">
             <Image
@@ -124,28 +102,28 @@ const Home = () => {
             <Text className="text-center font-bold text-3xl text-secondary-100">
               NEW & TRENDING
             </Text>
-            <Text className="text-center text-sm text-primary">
-              Shop Now
-            </Text>
+            <Text className="text-center text-sm font-bold text-primary">Shop Now</Text>
             <Image
               source={icons.rightArrow}
-              className="w-[15px] h-[15px] mt-[-18px] ml-[220px]"
+              className="w-[15px] h-[15px] mt-[-16px] ml-[215px]"
               resizeMode="contain"
             />
           </View>
-        </View>
 
-        <View className="justify-start gap-2 items-start flex-row px-2 mb-4">
-            <View className=" h-[30px] border-2 border-gray-100 rounded-2xl items-center justify-center">
-              <Text className="font-bold text-center text-secondary-100 px-4">
-                Recommended For You
-              </Text>
-           </View>
+          <TouchableOpacity
+              className={`w-[180px] h-[30px] border-2 border-gray-100 rounded-2xl items-center justify-center ml-4 px-2 `}
+            >
+              <Text className="font-bold text-center text-secondary-100">Recommended for you</Text>
+            </TouchableOpacity>
+
+          <View>
+            <ProductList selected={selected} tags={tags} />
           </View>
 
-        <ProductList tags={tags}/>
-
-        
+          <View>
+            <QuizComponent />
+          </View>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
