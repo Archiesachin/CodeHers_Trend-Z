@@ -23,6 +23,7 @@ const ProductDetailScreen = () => {
   const [name, setName] = useState("");
   const [processedImageUrl, setProcessedImageUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [imageKey, setImageKey] = useState(0);
 
   useEffect(() => {
     const fetchUserData = () => {
@@ -98,6 +99,7 @@ const ProductDetailScreen = () => {
     setIsLoading(false);
     if (imageUrl) {
       setProcessedImageUrl(imageUrl);
+      setImageKey(imageKey + 1);
       console.log(`${imageUrl}`);
       console.log(`${API_URL}${imageUrl}`);
     }
@@ -133,7 +135,7 @@ const ProductDetailScreen = () => {
           <Text className="text-md text-gray-700 mb-4 font-bold">
             Price: Rs.{productData.price}
           </Text>
-          
+
           <View className="flex-row justify-between mt-4 px-2">
             <TouchableOpacity
               className="bg-gray-100 px-4 rounded-lg flex-1 mr-2 justify-center items-center w-[150px]"
@@ -161,7 +163,7 @@ const ProductDetailScreen = () => {
           </View>
           {processedImageUrl && (
             <Image
-              source={{ uri: processedImageUrl }}
+              source={{ uri: `${processedImageUrl}?t=${new Date().getTime()}` }}
               style={{
                 width: 300,
                 height: 300,

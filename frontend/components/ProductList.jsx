@@ -50,16 +50,14 @@ const ProductList = ({ tags }) => {
       data={products}
       keyExtractor={(item) => item.url}
       renderItem={({ item }) => (
-        <TouchableOpacity onPress={() => handleProductPress(item)}>
           <View style={styles.productCard}>
             <Image source={{ uri: item.image }} style={styles.image} />
             <Text style={styles.productName}>{item.name}</Text>
             <Text style={styles.productPrice}>Price: {item.price}</Text>
-            <Text style={styles.link} onPress={() => Linking.openURL(item.url)}>
+            <Text style={styles.link} onPress={() => handleProductPress(item)}>
               View Product
             </Text>
           </View>
-        </TouchableOpacity>
       )}
     />
   );

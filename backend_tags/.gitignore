@@ -1,5 +1,2 @@
 venv
 .env
-combined_data.csv
-trends_data.csv
-image_paths.csv

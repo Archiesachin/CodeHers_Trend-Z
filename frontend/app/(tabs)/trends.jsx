@@ -68,24 +68,19 @@ export default function Trends() {
      });
    };
   const renderProduct = ({ item }) => (
-    <TouchableOpacity onPress={() => handleProductPress(item)}>
-    <View style={styles.productCard}>
-      {item.image && (
-        <Image
-          source={{ uri: item.image }}
-          style={styles.productImage}
-        />
-      )}
-      <Text style={styles.productName}>{item.name}</Text>
-      <Text style={styles.productPrice}>{item.price}</Text>
-      <TouchableOpacity
-        style={styles.viewProductButton}
-        onPress={() => Linking.openURL(item.url)}
-      >
-        <Text style={styles.viewProductButtonText}>View Product</Text>
-      </TouchableOpacity>
-    </View>
-    </TouchableOpacity>
+      <View style={styles.productCard}>
+        {item.image && (
+          <Image source={{ uri: item.image }} style={styles.productImage} />
+        )}
+        <Text style={styles.productName}>{item.name}</Text>
+        <Text style={styles.productPrice}>{item.price}</Text>
+        <TouchableOpacity
+          style={styles.viewProductButton}
+          onPress={() => handleProductPress(item)}
+        >
+          <Text style={styles.viewProductButtonText}>View Product</Text>
+        </TouchableOpacity>
+      </View>
   );
 
   return (

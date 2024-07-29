@@ -20,13 +20,29 @@ from PIL import Image
 import secrets
 import os
 import csv
+import sqlite3
 
 secret_key = secrets.token_hex(16) 
 app = Flask(__name__)
 app.secret_key = secret_key
 CORS(app)
-
 print(app.secret_key)
+sqlite_conn = sqlite3.connect('cache.db', check_same_thread=False)
+cursor = sqlite_conn.cursor()
+
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS cache (
+        hashtag TEXT PRIMARY KEY,
+        data TEXT
+    )
+""")
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS trends_cache (
+        hashtag TEXT PRIMARY KEY,
+        data TEXT
+    )
+""")
+
 client = Client("levihsu/OOTDiffusion")
 # Establish connection to the API
 conn = http.client.HTTPSConnection("instagram-scraper-api2.p.rapidapi.com")
@@ -117,6 +133,29 @@ def suggest_hashtags(hashtags, num_hashtags=10):
     suggested_hashtags = [hashtag for hashtag, count, score in scored_hashtags[:num_hashtags]]
 
     return suggested_hashtags
+def cache_data(hashtag, data):
+    cursor.execute("INSERT OR REPLACE INTO cache (hashtag, data) VALUES (?, ?)", (hashtag, json.dumps(data)))
+    sqlite_conn.commit()
+
+def get_cached_data(hashtag):
+    cursor.execute("SELECT data FROM cache WHERE hashtag = ?", (hashtag,))
+    row = cursor.fetchone()
+    if row:
+        return json.loads(row[0])
+    else:
+        return None  
+
+def cache_dataT(hashtag, data, table_name='trends_cache'):
+    cursor.execute("INSERT OR REPLACE INTO {} (hashtag, data) VALUES (?, ?)".format(table_name), (hashtag, json.dumps(data)))
+    sqlite_conn.commit()
+
+def get_cached_trends_data(hashtag):
+    cursor.execute("SELECT data FROM trends_cache WHERE hashtag = ?", (hashtag,))
+    row = cursor.fetchone()
+    if row:
+        return json.loads(row[0])
+    else:
+        return None 
 
 @app.route('/hashtags', methods=['GET'])
 def suggest_hashtags_endpoint():
@@ -157,9 +196,12 @@ def suggest_hashtags_endpoint():
     hashtags = lst
     print(hashtags)
     suggested_hashtags = suggest_hashtags(hashtags, num_hashtags=10)
+    df = pd.DataFrame(suggested_hashtags)
+    csv_filename = 'hashtags.csv'
+    df.to_csv(csv_filename, index=False)
+
+    print(f"Data saved to {csv_filename}")
     return jsonify({"suggested_hashtags": suggested_hashtags})
-
-
 
 # Endpoint to scrape products using hashtags
 @app.route('/trends', methods=['POST'])
@@ -237,7 +279,7 @@ def scrape_products():
                     )
                     
                     # Scroll to load more products
-
+                    scroll_page(1)
                     
                     # Find all product elements
                     product_elements = driver.find_elements(By.XPATH, "//div[contains(@class, 'st-product')]")
@@ -302,12 +344,15 @@ def scrape_products():
     print(f"Data saved to {csv_filename}")
     return jsonify({"products": all_products})
 
-
 @app.route('/interest', methods=['POST'])
 def scrape():
+    print("Received request:", request.json)
     selected_tags = request.json.get('tags', [])
+    if isinstance(selected_tags, str):
+        selected_tags = [selected_tags]
     base_url = 'https://www.myntra.com/'
     all_products = []
+    print("Selected tags:", selected_tags)
 
     def start_browser():
         options = webdriver.ChromeOptions()
@@ -416,6 +461,8 @@ def get_image(filename):
                 image_path = row[0]
                 return send_file(image_path, mimetype='image/webp')
     return 'Image not found', 404
+
+sqlite_conn.commit()
 
 if __name__ == '__main__':
     app.run(debug=True)
