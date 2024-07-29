@@ -66,6 +66,16 @@ const SnapStory = () => {
     </TouchableOpacity>
   );
 
+  const handleViewProduct = (item) => {
+    navigation.navigate("ProductDetailScreen", {
+      product: JSON.stringify({
+        image: item.pictureUri,
+        name: "Sample Product",
+        price: "999", // Replace with actual product price if available
+      }),
+    });
+  };
+
   const handleCloseModal = () => {
     setSelectedItem(null);
   };
@@ -100,13 +110,19 @@ const SnapStory = () => {
             <View style={{ width: '80%', height: '80%', backgroundColor: '#333333', borderRadius: 8 }}>
               <Image
                 source={{ uri: selectedItem?.pictureUri }}
-                style={{ width: '100%', height: '100%', borderRadius: 8 }}
+                style={{ width: '100%', height: '80%', borderRadius: 8 }}
                 onLoad={() => console.log("Selected image loaded:", selectedItem?.pictureUri)}
                 onError={(error) => {
                   console.log("Selected image load error:", error.nativeEvent.error);
                   Alert.alert("Image Load Error", "Unable to load selected image.");
                 }}
               />
+              <TouchableOpacity
+                onPress={() => handleViewProduct(selectedItem)}
+                style={{ backgroundColor: '#fff', padding: 10, marginTop: 10, borderRadius: 8, alignItems: 'center' }}
+              >
+                <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#000' }}>View Product</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </TouchableOpacity>

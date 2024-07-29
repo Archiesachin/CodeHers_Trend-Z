@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { doc, getDoc, setDoc, updateDoc, increment } from 'firebase/firestore';
 import { firebaseAuth, firestoreDB, storage } from '../../config/firebase.config';
 import { useNavigation } from '@react-navigation/native';
@@ -141,6 +141,15 @@ const Cart = () => {
     }
   };
 
+  const calculateTotalPrice = () => {
+    return cartItems.reduce((total, item) => total + (item.price || 0) * (item.quantity || 1), 0).toFixed(2);
+  };
+
+  const handleBuyNow = () => {
+    // Handle the buy now action, e.g., redirect to a checkout screen or show an alert
+    Alert.alert("Purchase", "Proceed to checkout?");
+  };
+
   const renderItem = ({ item, index }) => (
     <View className="items-center bg-gray-100 p-4 rounded-lg shadow-md mb-4 mx-4 h-72">
       <View className="flex-row ">
@@ -204,6 +213,15 @@ const Cart = () => {
           keyExtractor={(item, index) => index.toString()}
         />
       )}
+      {cartItems.length > 0 && (
+        <View style={styles.footer}>
+          <Text style={styles.totalPrice}>Total: Rs.{calculateTotalPrice()}</Text>
+          <TouchableOpacity style={styles.buyNowButton} onPress={handleBuyNow}>
+            <Text style={styles.buyNowText}>Buy Now</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+      
     </View>
   );
 };
@@ -211,6 +229,32 @@ const Cart = () => {
 const styles = StyleSheet.create({
   image: {
     resizeMode: 'cover',
+  },
+  footer: {
+    display:"flex",
+    flexDirection:"column",
+    padding: 16,
+    backgroundColor: '#f8f8f8',
+    borderTopWidth: 1,
+    borderTopColor: '#ddd',
+    justifyContent: 'space between',
+    alignItems: 'center',
+  },
+  totalPrice: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  buyNowButton: {
+    backgroundColor: '#FF9C01',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  buyNowText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
