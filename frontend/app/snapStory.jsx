@@ -76,7 +76,7 @@ const SnapStory = () => {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <MaterialIcons name="chevron-left" size={32} color={"#000"} />
         </TouchableOpacity>
-        <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#333' }}>Fashion Snap</Text>
+        <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#333' }}>Fwd Snap</Text>
         <View>
           <Image
             source={icons.profile}

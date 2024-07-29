@@ -25,6 +25,7 @@ import save from '../assets/icons/save.png'
 import user from '../assets/icons/user.png'
 import chat from '../assets/icons/chat.png'
 import hashtag from '../assets/icons/hashtag.png'
+import camera from "../assets/icons/camera.png"
 
 
 export default {
@@ -54,5 +55,6 @@ export default {
   close,
   user,
   hashtag,
-  chat
+  chat, 
+  camera
 };

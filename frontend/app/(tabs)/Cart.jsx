@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
-import { doc, getDoc,setDoc } from 'firebase/firestore';
-import { firebaseAuth, firestoreDB } from '../../config/firebase.config';
+import { doc, getDoc, setDoc, updateDoc, increment } from 'firebase/firestore';
+import { firebaseAuth, firestoreDB, storage } from '../../config/firebase.config';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons, AntDesign } from '@expo/vector-icons';
 import { icons } from '../../constants';
 import { useLocalSearchParams } from "expo-router";
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -67,6 +68,7 @@ const Cart = () => {
       }
     }
   }, [newProduct]);
+
   useEffect(() => {
     const updateFirebaseCart = async () => {
       const user = firebaseAuth.currentUser;
@@ -100,33 +102,80 @@ const Cart = () => {
     });
   };
 
+  const handleShare = async (picture) => {
+    if (picture) {
+      try {
+        // Fetch the image from the URI and convert it to a blob
+        const response = await fetch(picture);
+        const blob = await response.blob();
+        
+        // Create a reference for the new image in Firebase Storage
+        const storageRef = ref(storage, `images/${Date.now()}.jpg`);
+        
+        // Upload the image blob to Firebase Storage with metadata
+        await uploadBytes(storageRef, blob, {
+          customMetadata: { accountName: name }, // Metadata with the user's full name
+        });
+        
+        // Get the download URL for the uploaded image
+        const downloadURL = await getDownloadURL(storageRef);
+        console.log("Image uploaded successfully:", downloadURL);
+        
+        // Update the user's SnapScore
+        const user = firebaseAuth.currentUser;
+        if (user) {
+          const userRef = doc(firestoreDB, 'users', user.uid);
+          await updateDoc(userRef, {
+            snapScore: increment(1) // Increment SnapScore by 1
+          });
+        }
+        
+        // Redirect to SnapStory with the image URL as a parameter
+        navigation.navigate('snapStory', { pictureUri: downloadURL });
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        alert("Failed to upload and share the image. Please check the console for more details.");
+      }
+    } else {
+      alert("No picture to share.");
+    }
+  };
+
   const renderItem = ({ item, index }) => (
-    <View className="flex-row items-center bg-gray-100 p-4 rounded-lg shadow-md mb-4 mx-4">
-      <Image
-        source={{ uri: item.image || item["Image URL"] }}
-        className="w-20 h-20 mr-4"
-        style={styles.image}
-      />
-      <View className="flex-1">
-        <Text className="text-lg font-semibold">
-          {item.name || item["Product Name"]}
-        </Text>
-        <Text className="text-blue-500 mt-2">
-          {item.price || item["Price"]}
-        </Text>
+    <View className="items-center bg-gray-100 p-4 rounded-lg shadow-md mb-4 mx-4 h-72">
+      <View className="flex-row ">
+        <Image
+          source={{ uri: item.image || item["Image URL"] }}
+          className="w-[120px] h-64 mr-4"
+          style={styles.image}
+        />
+        <View className="flex-1">
+          <Text className="text-lg font-semibold">
+            {item.name || item["Product Name"]}
+          </Text>
+          <Text className="text-blue-500 mt-2 font-md">
+            Rs.{item.price || item["Price"]}
+          </Text>
+        </View>
       </View>
-      <View className="flex-row items-center justify-between bg-gray-200 p-2 rounded-lg">
+      <View className="flex-row items-center justify-between p-2 rounded-lg ml-20 mt-[-130px]">
         <TouchableOpacity onPress={() => decreaseQuantity(index)}>
-          <AntDesign name="minuscircleo" size={24} color="#000" />
+          <AntDesign name="minuscircleo" size={20} color="#000" />
         </TouchableOpacity>
-        <Text className="text-lg font-bold mx-2">{item.quantity || 1}</Text>
+        <Text className="text-md font-bold mx-2">{item.quantity || 1}</Text>
         <TouchableOpacity onPress={() => increaseQuantity(index)}>
-          <AntDesign name="pluscircleo" size={24} color="#000" />
+          <AntDesign name="pluscircleo" size={20} color="#000" />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => removeItem(index)} className="ml-2">
-          <AntDesign name="delete" size={24} color="red" />
+          <AntDesign name="delete" size={20} color="red" />
         </TouchableOpacity>
       </View>
+      <TouchableOpacity
+        onPress={() => handleShare(item.image || item["Image URL"])}
+        className="ml-28 mt-2 bg-secondary p-2 rounded-lg"
+      >
+        <Text className="text-white font-semibold text-md">Share to Fwd Snap</Text>
+      </TouchableOpacity>
     </View>
   );
 
@@ -138,13 +187,13 @@ const Cart = () => {
         </TouchableOpacity>
         <Text className="text-3xl font-bold text-white">Cart</Text>
         <View className="flex justify-center items-center">
-            <Image
-              source={icons.profile}
-              resizeMode="contain"
-              className="w-8 h-8 rounded-full"
-            />
-            <Text className="text-xl font-bold text-white">{name}</Text>
-          </View>
+          <Image
+            source={icons.profile}
+            resizeMode="contain"
+            className="w-8 h-8 rounded-full"
+          />
+          <Text className="text-xl font-bold text-white">{name}</Text>
+        </View>
       </View>
       {cartItems.length === 0 ? (
         <Text className="text-center text-lg mt-4">Your cart is empty.</Text>
