@@ -19,9 +19,11 @@ const QuizComponent = () => {
   const questions = [
     { question: "Outfit for a Day Out", optionA: barbie, optionB: cottage },
     { question: "Work Attire", optionA: corporate, optionB: street },
-    { question: "Favorite Academic Style", optionA: academia, optionB: brat },
+    { question: "Back-to-School Style", optionA: academia, optionB: brat },
     { question: "Party Look", optionA: corporate, optionB: goth },
-    { question: "Weekend Vibes", optionA: barbie, optionB: cottage },
+    { question: "Date Night Outfit", optionA: street , optionB: barbie },
+    { question: "Girls Brunch Outfit", optionA: cottage, optionB: academia },
+    { question: "Baddie Outfit", optionA: brat, optionB: goth },
   ];
 
   const cores = {
@@ -39,7 +41,9 @@ const QuizComponent = () => {
     1: { 'A': 'Corporate', 'B': 'Street' },
     2: { 'A': 'Old Academia', 'B': 'Brat' },
     3: { 'A': 'Corporate', 'B': 'Goth' },
-    4: { 'A': 'Barbie', 'B': 'Cottage' }
+    4: { 'A': 'Street', 'B': 'Barbie' },
+    5: { 'A': 'Cottage', 'B': 'Old Academia' },
+    6: { 'A': 'Brat', 'B': 'Goth' }
   };
 
   const handleChoice = (choice) => {
@@ -103,6 +107,8 @@ const QuizComponent = () => {
   const renderItem = ({ item }) => (
     <View style={styles.card}>
       <Image source={{ uri: item.image }} style={styles.image} />
+      <Text style={styles.name}>{item.name}</Text>
+      <Text style={styles.price}>Rs.{item.price}</Text>
       <Text style={styles.cores}>{item.cores}</Text>
       <TouchableOpacity onPress={() => Linking.openURL(item.url)}>
         <Text style={styles.url} onPress={() => handleProductPress(item)}>View Product</Text>
@@ -177,12 +183,20 @@ const styles = StyleSheet.create({
   },
   cores: {
     marginTop: 5,
-    fontSize: 16,
+    fontSize: 10,
+    textAlign: 'center',
+  },
+  name:{
+    fontSize: 15,
     fontWeight: 'bold',
     textAlign: 'center',
   },
+  price:{
+    fontSize: 15,
+    textAlign: 'center',
+  },
   url: {
-    marginTop: 5,
+    marginTop: 10,
     fontSize: 16,
     color: 'white',
     textAlign: 'center',
