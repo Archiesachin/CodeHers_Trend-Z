@@ -131,7 +131,9 @@ const ProductDetailScreen = () => {
           />
         </View>
         <View className="px-8">
-          <Text className="text-2xl font-bold mb-2">{productData.name ||productData.product_name}</Text>
+          <Text className="text-2xl font-bold mb-2">
+            {productData.name || productData.product_name}
+          </Text>
           <Text className="text-md text-gray-700 mb-4 font-bold">
             Price:{productData.price}
           </Text>
@@ -151,9 +153,34 @@ const ProductDetailScreen = () => {
             >
               <Text className="text-secondary-100 font-bold">Wishlist</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push('/TakePhotoScreen')}>
-      <Text>Go to Take Photo Screen</Text>
-    </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                console.log("Full productData:", productData);
+                const imageUrl =
+                  productData?.image ?? productData?.image_url ?? null;
+                console.log("Determined imageUrl:", imageUrl);
+                if (imageUrl) {
+                  console.log(
+                    "Navigating to TakePhotoScreen with imageUrl:",
+                    imageUrl
+                  );
+                  router.push({
+                    pathname: "/TakePhotoScreen",
+                    params: {
+                      productImageUrl: encodeURIComponent(imageUrl),
+                    },
+                  });
+                } else {
+                  console.log("No image URL available");
+                  Alert.alert(
+                    "Error",
+                    "No image URL available for this product"
+                  );
+                }
+              }}
+            >
+              <Text>Try it on me!</Text>
+            </TouchableOpacity>
             <TouchableOpacity
               onPress={handleTryOn}
               className="bg-gray-100 p-4 rounded-lg flex-1 ml-2"

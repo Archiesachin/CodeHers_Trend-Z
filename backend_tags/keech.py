@@ -463,12 +463,16 @@ def scrape():
 @app.route('/try-on', methods=['POST'])
 def try_on():    
     try:
-        garm_img_url = request.json['garm_img_url']
-        print("Received image URL:", garm_img_url)
+        garm_img_url = request.json.get('garm_img_url')
+        uploaded_img_url = request.json.get('uploaded_img_url')
 
+        print("Received garment image URL:", garm_img_url)
+        print("Received uploaded image URL:", uploaded_img_url)
+        if not garm_img_url or not uploaded_img_url:
+            raise ValueError("Both garment image URL and uploaded image URL are required.")
         # Process the image using OOTDiffusion
         result = client.predict(
-            vton_img=handle_file('https://levihsu-ootdiffusion.hf.space/file=/tmp/gradio/2e0cca23e744c036b3905c4b6167371632942e1c/model_1.png'),
+            vton_img=handle_file(uploaded_img_url),
             garm_img=handle_file(garm_img_url),
             n_samples=1,
             n_steps=20,

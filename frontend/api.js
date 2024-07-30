@@ -50,15 +50,16 @@ export const getInterestProducts = async (tags) => {
   return data;
 };
 
-export const sendImageUrlToServer = async (garm_img_url) => {
+export const sendImageUrlToServer = async (garm_img_url, uploaded_img_url) => {
   try {
     console.log("Sending image URL:", garm_img_url);
+    console.log("Sending image URL:", uploaded_img_url);
     const response = await fetch(`${API_URL}/try-on`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ garm_img_url }),
+      body: JSON.stringify({ garm_img_url, uploaded_img_url }),
     });
     if (response.ok) {
       const data = await response.json();

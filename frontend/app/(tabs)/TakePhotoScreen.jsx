@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { View, Text, Button, Image, Alert, TouchableOpacity, ScrollView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -7,10 +7,19 @@ import { firebaseAuth, firestoreDB } from '../../config/firebase.config'; // Adj
 import { doc, updateDoc, increment } from 'firebase/firestore';
 import { MaterialIcons, AntDesign } from '@expo/vector-icons';
 import {icons, images} from '../../constants'
+import { useLocalSearchParams } from 'expo-router';
+import { sendImageUrlToServer } from '../../api';
 
 const TakePhotoScreen = ({ navigation }) => {
+  const params = useLocalSearchParams();
+  console.log("All received params:", params);
+  const { productImageUrl } = params;
+  console.log("Extracted productImageUrl:", productImageUrl);
   const [image, setImage] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [processedImageUrl, setProcessedImageUrl] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [imageKey, setImageKey] = useState(0);
 
   const takePhoto = async () => {
     // Request camera permissions if not granted
@@ -73,7 +82,7 @@ const TakePhotoScreen = ({ navigation }) => {
             snapScore: increment(1) // Increment SnapScore by 1
           });
         }
-
+        await handleTryOn(downloadURL, productImageUrl);
         // Redirect to SnapStory with the image URL and text as parameters
         // navigation.navigate('snapStory', { pictureUri: downloadURL, text });
       } catch (error) {
@@ -87,9 +96,28 @@ const TakePhotoScreen = ({ navigation }) => {
     }
   };
 
+  const handleTryOn = async (uploadedImageUrl, productImageUrl) => {
+    setIsLoading(true);
+    try {
+      const imageUrl = await sendImageUrlToServer(
+        productImageUrl,
+        uploadedImageUrl
+      );
+      setIsLoading(false);
+      if (imageUrl) {
+        setProcessedImageUrl(imageUrl);
+        setImageKey(imageKey + 1);
+        console.log(`${imageUrl}`);
+        console.log(`${API_URL}${imageUrl}`);
+      }
+    } catch (error) {
+      console.error("Error during try-on process:", error);
+      setIsLoading(false);
+    }
+  };
   return (
-    <ScrollView >
-          <View className="flex-row justify-between items-center mb-4 bg-secondary-100 pt-14 pb-4 px-4">
+    <ScrollView>
+      <View className="flex-row justify-between items-center mb-4 bg-secondary-100 pt-14 pb-4 px-4">
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <MaterialIcons name="chevron-left" size={32} color="#fff" />
         </TouchableOpacity>
@@ -100,44 +128,57 @@ const TakePhotoScreen = ({ navigation }) => {
             resizeMode="contain"
             className="w-8 h-8 rounded-full"
           />
-          
         </View>
       </View>
 
       <View className="flex justify-center items-center pb-6 border-b-gray-100 border-b-2">
-      
-      <View className="flex-row mt-2 w-full px-4">
-        <View className="flex-1 mr-2 w-[100px]">
-          <Text className="font-semibold text-lg mb-2">Dos</Text>
-          <Text className="text-sm">
-            • Ensure good lighting for a clear image{'\n'}
-            • Position yourself in a well-lit area{'\n'}
-            • Stand in a staright pose foe better results
-          </Text>
+        <View className="flex-row mt-2 w-full px-4">
+          <View className="flex-1 mr-2 w-[100px]">
+            <Text className="font-semibold text-lg mb-2">Dos</Text>
+            <Text className="text-sm">
+              • Ensure good lighting for a clear image{"\n"}• Position yourself
+              in a well-lit area{"\n"}• Stand in a straight pose for better
+              results
+            </Text>
+          </View>
+          <View className="flex-1 ml-2">
+            <Text className="font-semibold text-lg mb-2">Don'ts</Text>
+            <Text className="text-sm">
+              • Avoid taking photos in low light{"\n"}• Don’t use flash as it
+              can cause glare{"\n"}• Avoid wearing overly busy patterns
+            </Text>
+          </View>
         </View>
-        <View className="flex-1 ml-2">
-          <Text className="font-semibold text-lg mb-2">Don'ts</Text>
-          <Text className="text-sm">
-            • Avoid taking photos in low light{'\n'}
-            • Don’t use flash as it can cause glare{'\n'}
-            • Avoid wearing overly busy patterns
-          </Text>
-        </View>
-      </View>
-        <Image
-          source={images.model}
-          className="w-40 h-60 rounded-lg mt-4"
-        />
+        <Image source={images.model} className="w-40 h-60 rounded-lg mt-4" />
         <Text>Reference Image</Text>
       </View>
 
       <View className="flex justify-center items-center mt-10 mb-10">
-
-      <Text style={{ fontSize: 24, marginBottom: 10 }}>Take a Photo</Text>
-      <Button title={uploading ? 'Uploading...' : 'Take Photo'} onPress={takePhoto} disabled={uploading} />
-      {image && (
-        <Image source={{ uri: image }} style={{ width: 200, height: 400, marginTop: 20, borderRadius: 8 }} />
-      )}
+        <Text style={{ fontSize: 24, marginBottom: 10 }}>Take a Photo</Text>
+        <Button
+          title={uploading ? "Uploading..." : "Take Photo"}
+          onPress={takePhoto}
+          disabled={uploading}
+        />
+        {image && (
+          <Image
+            source={{ uri: image }}
+            style={{ width: 200, height: 400, marginTop: 20, borderRadius: 8 }}
+          />
+        )}
+        {isLoading && <Text>Loading...</Text>}
+        {processedImageUrl && (
+          <View style={{ marginTop: 20 }}>
+            <Text style={{ fontSize: 18, marginBottom: 10 }}>
+              Processed Image
+            </Text>
+            <Image
+              key={imageKey} // Force re-render if imageKey changes
+              source={{ uri: `${processedImageUrl}` }}
+              style={{ width: 200, height: 400, borderRadius: 8 }}
+            />
+          </View>
+        )}
       </View>
     </ScrollView>
   );
