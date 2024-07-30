@@ -12,6 +12,8 @@ import { storage, firebaseAuth, firestoreDB } from '../../config/firebase.config
 import { doc, updateDoc, increment , getDoc} from 'firebase/firestore';
 
 
+
+
 const Snapchat = () => {
   const router = useRouter();
   const cameraRef = useRef(null);
@@ -49,33 +51,39 @@ const Snapchat = () => {
     }
   }
 
-  const handleShare = async () => {
+  const handleShare = async (picture, text) => {
     if (picture) {
       try {
+        // Fetch the image from the URI and convert it to a blob
         const response = await fetch(picture);
         const blob = await response.blob();
+        
+        // Create a reference for the new image in Firebase Storage
         const storageRef = ref(storage, `images/${Date.now()}.jpg`);
-    
+        
+        // Upload the image blob to Firebase Storage with metadata
         await uploadBytes(storageRef, blob, {
-          customMetadata: { accountName }, // Add metadata with the user's full name
+          customMetadata: { 
+            accountName: name, // Metadata with the user's full name
+            text: text || '' // Adding text to metadata
+          },
         });
-    
+        
+        // Get the download URL for the uploaded image
         const downloadURL = await getDownloadURL(storageRef);
         console.log("Image uploaded successfully:", downloadURL);
-  
-        // Update the snapScore
+        
+        // Update the user's SnapScore
         const user = firebaseAuth.currentUser;
         if (user) {
           const userRef = doc(firestoreDB, 'users', user.uid);
           await updateDoc(userRef, {
-            snapScore: increment(1) // Increment snapScore by 1
+            snapScore: increment(1) // Increment SnapScore by 1
           });
         }
-  
-        router.push({
-          pathname: '/snapStory',
-          params: { pictureUri: downloadURL },
-        });
+        
+        // Redirect to SnapStory with the image URL and text as parameters
+        navigation.navigate('snapStory', { pictureUri: downloadURL, text });
       } catch (error) {
         console.error('Error uploading image:', error);
         alert("Failed to upload and share the image. Please check the console for more details.");
@@ -84,6 +92,7 @@ const Snapchat = () => {
       alert("No picture to share.");
     }
   };
+  
   
   if (picture) return <PictureView picture={picture} setPicture={setPicture} handleShare={handleShare}/>
 

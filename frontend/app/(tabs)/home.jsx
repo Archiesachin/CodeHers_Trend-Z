@@ -6,6 +6,7 @@ import { icons, images } from '../../constants';
 import Searchinput from '../../components/Searchinput';
 import ProductList from '../../components/ProductList';
 import QuizComponent from '../../components/QuizComponent';
+import HomeStories from './homestories'
 
 const imagesSlide = [
   { id: "1", uri: "https://via.placeholder.com/600x210?text=Image+1" },
@@ -187,6 +188,10 @@ const Home = () => {
 
           <View>
             <ProductList selected={selected} tags={tags} />
+          </View>
+
+          <View>
+            <HomeStories/>
           </View>
 
           <View>

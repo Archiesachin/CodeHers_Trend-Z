@@ -1,7 +1,7 @@
 const products = [
     {
         "image": "https://assets.myntassets.com/h_720,q_90,w_540/v1/assets/images/29155372/2024/6/28/950dec65-fac1-41d7-a1ea-7c1856d78a261719547113724-DressBerry-Barbiecore-Floral-Fantasy-Strappy-Midi-Dress-6181-2.jpg",
-        "cores": "barbie",
+        "cores": "cottage, barbie",
         "url": "https://www.myntra.com/dresses/dressberry/dressberry-barbiecore-floral-fantasy-strappy-knee-length-dress/29155372/buy",
         "name": "Floral fantasy strappy knee length dress", 
         "price": "799"
@@ -9,14 +9,14 @@ const products = [
     },
     {
         "image": "https://littleboxindia.com/cdn/shop/files/f1d4802c9c39391020211dc1fb328304_540x.jpg?v=1719493846",
-        "cores": "barbie",
+        "cores": "cottage, barbie",
         "url": "https://littleboxindia.com/products/tie-shoulder-layered-ruched-cami-dress-in-pink?variant=48871283360031&currency=INR&utm_medium=product_sync&utm_source=google&utm_content=sag_organic&utm_campaign=sag_organic&utm_campaign=gs-2022-04-12&utm_source=google&utm_medium=smart_campaign&gad_source=1&gclid=CjwKCAjwko21BhAPEiwAwfaQCBiV9emXbddgD0ZWbxw9wbBzZiBneBz_MT-2SNRIWpqB1P2_uXm1sRoCmiUQAvD_BwE",
         "name": "Tie Shoulder Layered Ruched Cami Dress",
         "price": "799"
     },
     {
       "image": "https://www.alamodelabel.in/cdn/shop/files/0D8A3EC3-5BEC-48D4-B8EB-F5AD7BAEB806_1200x.jpg?v=1717504219",
-      "cores": "barbie",
+      "cores": "corporate, barbie",
       "url": "https://www.alamodelabel.in/products/summer-bubble-two-piece-set-in-pink", 
       "name" : "Summer Bubble Two Piece Set",
       "price": "2450"

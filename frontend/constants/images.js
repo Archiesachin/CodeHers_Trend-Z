@@ -17,5 +17,6 @@ import goth from "../assets/images/goth-core.png"
 import street from "../assets/images/street-core.png"
 import corporate from "../assets/images/Corporate-core.png"
 import cottage from "../assets/images/cottage-core.png"
+import model from "../assets/images/model.png"
 
-export default { profile, thumbnail, cards, path, logo, logoSmall, empty, header, bottom, jacket, sandals, top, barbie, academia, brat, goth, street, corporate, cottage };
+export default { profile, thumbnail, cards, path, logo, logoSmall, empty, header, bottom, jacket, sandals, top, barbie, academia, brat, goth, street, corporate, cottage , model};

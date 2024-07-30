@@ -8,6 +8,7 @@ import { icons } from '../../constants';
 import { doc, getDoc } from 'firebase/firestore';
 import { firebaseAuth, firestoreDB } from '../../config/firebase.config';
 
+
 const TabIcon = ({ icon, color, name, focused }) => {
   return (
     <View style={{ alignItems: 'center', justifyContent: 'center', gap: 2 }}>
@@ -121,10 +122,10 @@ const TabsLayout = () => {
       <Tabs.Screen
         name="snapchat"
         options={{
-          title: "Snapchat",
+          title: "Fashion Snap",
           headerShown: false,
-          tabBarIcon: ({ focused }) => (
-            <TabIcon icon={icons.snapchat} name="SnapChat" focused={focused} />
+          tabBarIcon: ({ focused, color }) => (
+            <TabIcon icon={icons.camera} name="Fwd Snap" focused={focused} color={color}/>
           ),
           tabBarButton: (props) => (
             <TouchableWithoutFeedback onPress={() => handleContinue()}>
@@ -236,6 +237,20 @@ const TabsLayout = () => {
       />
       <Tabs.Screen
         name="Men"
+        options={{
+          tabBarButton: () => null,
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="homestories"
+        options={{
+          tabBarButton: () => null,
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="TakePhotoScreen"
         options={{
           tabBarButton: () => null,
           headerShown: false,

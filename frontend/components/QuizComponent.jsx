@@ -82,7 +82,7 @@ const QuizComponent = () => {
       const currentQuestion = questions[step];
       return (
         <View style={styles.quizContainer}>
-          <Text style={styles.quizHeading}>CHOOSE YOUR CORE</Text>
+          <Text style={styles.quizHeading}>Choose Your Cores</Text>
           <Text style={styles.quizQuestion}>{currentQuestion.question}</Text>
           <View style={styles.quizOptions}>
             <TouchableOpacity
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     lineHeight: 36 ,
   },
   quizQuestion: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 10,
