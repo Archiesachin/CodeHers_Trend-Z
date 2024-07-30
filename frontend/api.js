@@ -1,8 +1,8 @@
 // src/api.js
-const API_URL = "https://a966-103-123-37-135.ngrok-free.app"; // Adjust this if your Flask app runs on a different port
+const API_URL = "https://15c7-210-16-113-128.ngrok-free.app"; // Adjust this if your Flask app runs on a different port
 
 export const getHashtags = async () => {
-  const response = await fetch(`${API_URL}/hashtags`, {
+  const response = await fetch(`${API_URL}/get-suggested-hashtags`, {
     method: "GET",
     mode: "cors",
     headers: { "Content-Type": "application/json" },
@@ -14,19 +14,25 @@ export const getHashtags = async () => {
   return data.suggested_hashtags;
 };
 
-export const scrapeProducts = async (hashtags) => {
-  const response = await fetch(`${API_URL}/trends`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ hashtags }),
-  });
-  if (!response.ok) {
-    throw new Error("Network response was not ok");
+
+export const scrapeProducts = async () => {
+  try {
+    const response = await fetch(`${API_URL}/get-trends-data`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    console.log("Received data:", data); // For debugging
+    return data;
+  } catch (error) {
+    console.error("There was a problem with the fetch operation:", error);
+    throw error;
   }
-  const data = await response.json();
-  return data.products;
 };
 
 export const getInterestProducts = async (tags) => {

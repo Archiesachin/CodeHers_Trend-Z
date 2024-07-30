@@ -126,14 +126,14 @@ const ProductDetailScreen = () => {
 
         <View className="flex justify-center items-center">
           <Image
-            source={{ uri: productData.image }}
+            source={{ uri: productData.image || productData.image_url }}
             className="w-[300px] h-64 bg-gray-200 mb-4 rounded-lg"
           />
         </View>
         <View className="px-8">
-          <Text className="text-2xl font-bold mb-2">{productData.name}</Text>
+          <Text className="text-2xl font-bold mb-2">{productData.name ||productData.product_name}</Text>
           <Text className="text-md text-gray-700 mb-4 font-bold">
-            Price: Rs.{productData.price}
+            Price:{productData.price}
           </Text>
 
           <View className="flex-row justify-between mt-4 px-2">

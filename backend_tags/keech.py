@@ -21,45 +21,60 @@ import secrets
 import os
 import csv
 import sqlite3
+import schedule
 
 secret_key = secrets.token_hex(16) 
 app = Flask(__name__)
 app.secret_key = secret_key
 CORS(app)
 print(app.secret_key)
-sqlite_conn = sqlite3.connect('cache.db', check_same_thread=False)
+sqlite_conn = sqlite3.connect('data_cache.db', check_same_thread=False)
 cursor = sqlite_conn.cursor()
 
-cursor.execute("""
-    CREATE TABLE IF NOT EXISTS cache (
-        hashtag TEXT PRIMARY KEY,
-        data TEXT
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS hashtags (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        hashtag TEXT UNIQUE,
+        data TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
-""")
-cursor.execute("""
-    CREATE TABLE IF NOT EXISTS trends_cache (
-        hashtag TEXT PRIMARY KEY,
-        data TEXT
+''')
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS trends_data (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        hashtag TEXT,
+        product_name TEXT,
+        url TEXT,
+        price TEXT,
+        image_url TEXT,
+        created_at DATETIME,
+        FOREIGN KEY (hashtag) REFERENCES hashtags (hashtag)     
     )
-""")
+''')
+
+
+def run_suggest_hashtags_endpoint():
+    print("Running suggest_hashtags_endpoint...")
+
+schedule.every().day.at("00:00").do(run_suggest_hashtags_endpoint)
+
 
 client = Client("levihsu/OOTDiffusion")
-# Establish connection to the API
+
 conn = http.client.HTTPSConnection("instagram-scraper-api2.p.rapidapi.com")
-# Set the headers including your API key
+
 headers = {
     'x-rapidapi-key': "d2b9f0bae4msha4451d9c477cacdp1b46ccjsn11166d9c2630",
     'x-rapidapi-host': "instagram-scraper-api2.p.rapidapi.com"
 }
-# Define the list of hashtags and time range
+
 hashtags_list = ["#fashion", "#trend", "#style", "#genz"]
-input_hashtags = set(tag.lstrip('#') for tag in hashtags_list)  # Remove the '#' from input hashtags
+input_hashtags = set(tag.lstrip('#') for tag in hashtags_list)  
 one_month_ago = datetime.now() - timedelta(days=30)
 
-# List of keywords related to fashion and clothing
 fashion_keywords = ['fashion', 'clothing', 'apparel', 'outfit', 'dress', 'shirt', 'pants', 'jeans', 'skirt', 'shoes', 'accessories','tshirt']
 
-# Function to request data for a specific hashtag
+
 def fetch_hashtag_data(hashtag):
     conn.request("GET", f"/v1/hashtag?hashtag={hashtag}", headers=headers)
     res = conn.getresponse()
@@ -67,21 +82,19 @@ def fetch_hashtag_data(hashtag):
     decoded_data = data.decode("utf-8")
     return json.loads(decoded_data)
 
-# Function to filter and sort posts by engagement
 def get_trending_posts(posts, start_date):
     trending_posts = []
     for post in posts:
         caption_data = post.get('caption')
-        if caption_data:  # Ensure caption_data is not None
+        if caption_data: 
             created_at = caption_data.get('created_at_utc', 0)
             created_date = datetime.utcfromtimestamp(created_at)
             if created_date >= start_date:
                 trending_posts.append(post)
-    # Sort posts by engagement metrics, for example, likes or comments
     trending_posts.sort(key=lambda x: x.get('like_count', 0), reverse=True)
     return trending_posts
 
-# Function to extract hashtags from posts
+
 def extract_hashtags(posts):
     hashtags = []
     for post in posts:
@@ -91,7 +104,6 @@ def extract_hashtags(posts):
             hashtags.extend([tag for tag in post_hashtags if tag not in input_hashtags and any(keyword in tag for keyword in fashion_keywords)])
     return hashtags
 
-# Define a function to clean hashtags
 def clean_hashtag(hashtag):
     cleaned = re.sub(r'[^a-zA-Z]', '', hashtag.lower())
     for keyword in fashion_keywords:
@@ -99,118 +111,159 @@ def clean_hashtag(hashtag):
         if keyword_index != -1:
             cleaned = cleaned[:keyword_index]
             break
-    print(f"Original: {hashtag}, Cleaned: {cleaned}")  # Print the cleaned hashtags
+    print(f"Original: {hashtag}, Cleaned: {cleaned}")
     return cleaned
 
-# Define a function to suggest hashtags
 def suggest_hashtags(hashtags, num_hashtags=10):
-    # Clean the hashtags
     cleaned_hashtags = [(clean_hashtag(hashtag), count) for hashtag, count in hashtags]
-
-    # Count the occurrences of cleaned hashtags
     hashtag_counts = Counter([hashtag for hashtag, _ in cleaned_hashtags])
-
-    # Define a scoring function based on data-driven heuristics
     def score_hashtag(hashtag, count):
         score = 0
-        
-        # Prioritize longer and more descriptive hashtags
         score += len(hashtag) * 0.6
-        
-        # Prioritize hashtags based on their frequency in the dataset
         score += count * 0.2
-        
-        # Prioritize hashtags that are more unique or distinctive
         score += 1 / hashtag_counts[hashtag]
-        
         return score
-
-    # Score and sort the hashtags based on the scoring function
     scored_hashtags = [(hashtag, count, score_hashtag(hashtag, count)) for hashtag, count in cleaned_hashtags]
     scored_hashtags.sort(key=lambda x: x[2], reverse=True)
-
-    # Suggest the top-scored hashtags
     suggested_hashtags = [hashtag for hashtag, count, score in scored_hashtags[:num_hashtags]]
 
     return suggested_hashtags
+
 def cache_data(hashtag, data):
-    cursor.execute("INSERT OR REPLACE INTO cache (hashtag, data) VALUES (?, ?)", (hashtag, json.dumps(data)))
-    sqlite_conn.commit()
+    cursor = sqlite_conn.cursor()
+    try:
+        cursor.execute(
+            '''
+            INSERT INTO hashtags (hashtag, data, created_at)
+            VALUES (?, ?, ?)
+            ''',
+            (hashtag, json.dumps(data), datetime.now())
+        )
+        sqlite_conn.commit()
+        print("Data cached successfully")
+    except sqlite3.IntegrityError:
+        cursor.execute(
+            '''
+            UPDATE hashtags
+            SET data = ?, created_at = ?
+            WHERE hashtag = ?
+            ''',
+            (json.dumps(data), datetime.now(), hashtag)
+        )
+        sqlite_conn.commit()
+    except sqlite3.Error as e:
+        print(f"An error occurred: {e}")
+    finally:
+        cursor.close()
 
 def get_cached_data(hashtag):
-    cursor.execute("SELECT data FROM cache WHERE hashtag = ?", (hashtag,))
+    cursor = sqlite_conn.cursor()
+    cursor.execute('''
+        SELECT data
+        FROM hashtags
+        WHERE hashtag = ?
+        ORDER BY created_at DESC
+        LIMIT 1
+    ''', (hashtag,))
     row = cursor.fetchone()
+    cursor.close()
     if row:
-        return json.loads(row[0])
+        data= json.loads(row[0])
+        return data.get('hashtags', [])
     else:
-        return None  
-
-def cache_dataT(hashtag, data, table_name='trends_cache'):
-    cursor.execute("INSERT OR REPLACE INTO {} (hashtag, data) VALUES (?, ?)".format(table_name), (hashtag, json.dumps(data)))
-    sqlite_conn.commit()
+        return None
 
 def get_cached_trends_data(hashtag):
-    cursor.execute("SELECT data FROM trends_cache WHERE hashtag = ?", (hashtag,))
-    row = cursor.fetchone()
-    if row:
-        return json.loads(row[0])
-    else:
-        return None 
+    cursor = sqlite_conn.cursor()
+    cursor.execute('''
+        SELECT DISTINCT hashtag, product_name, url, price, image_url, created_at
+        FROM trends_data
+        WHERE hashtag = ?
+        ORDER BY created_at DESC
+        LIMIT 4
+    ''', (hashtag,))
+    rows = cursor.fetchall()
+    cursor.close()
+    data = [{
+        'hashtag': row[0],
+        'product_name': row[1],
+        'url': row[2],
+        'price': row[3],
+        'image_url': row[4],
+        'created_at': row[5]
+    } for row in rows]
+    
+    return data
+
+@app.route('/get-suggested-hashtags', methods=['GET'])
+def get_suggested_hashtags():
+    suggested_hashtags = get_cached_data('suggested_hashtags')
+    if not suggested_hashtags:
+        return jsonify({"error": "Hashtags not found in cache"}), 404
+    return jsonify({"suggested_hashtags": suggested_hashtags})
+
+@app.route('/get-trends-data', methods=['GET'])
+def get_trends_data():
+    suggested_hashtags = get_cached_data('suggested_hashtags')
+    if not suggested_hashtags:
+        return jsonify({"error": "Suggested hashtags not found in cache"}), 404
+    trends_data = []
+    for hashtag in suggested_hashtags:
+        hashtag_trends = get_cached_trends_data(hashtag)
+        trends_data.extend(hashtag_trends)
+    
+    if not trends_data:
+        return jsonify({"error": "Trends data not found in cache"}), 404
+    
+    return jsonify({"products": trends_data})
 
 @app.route('/hashtags', methods=['GET'])
 def suggest_hashtags_endpoint():
-    # Initialize a dictionary to store hashtags for each category
-    category_hashtags = defaultdict(Counter)
+    try:
+        category_hashtags = defaultdict(Counter)
 
-    for hashtag in hashtags_list:
-        json_data = fetch_hashtag_data(hashtag.lstrip('#'))  
+        for hashtag in hashtags_list:
+            json_data = fetch_hashtag_data(hashtag.lstrip('#'))  
 
-        # Check if 'items' key is present in the JSON response
-        if 'data' in json_data and 'items' in json_data['data']:
-            posts = json_data['data']['items']
+            if 'data' in json_data and 'items' in json_data['data']:
+                posts = json_data['data']['items']
+                trending_month_posts = get_trending_posts(posts, one_month_ago)
+                all_hashtags = extract_hashtags(trending_month_posts)
+                category_hashtags[hashtag.lstrip('#')].update(all_hashtags)
+            else:
+                continue
 
-            # Get trending posts from the last month
-            trending_month_posts = get_trending_posts(posts, one_month_ago)
+        all_fashion_hashtags = set().union(*[set(counter) for counter in category_hashtags.values()])
+        top_fashion_hashtags = Counter(all_fashion_hashtags).most_common()
+        top_fashion_hashtags= [list(s) for s in top_fashion_hashtags]
 
-            # Extract all hashtags from the trending posts, excluding input hashtags and filtering for fashion-related hashtags
-            all_hashtags = extract_hashtags(trending_month_posts)
+        lst=[]
+        for i in range(len(top_fashion_hashtags)):
+            if top_fashion_hashtags[i][0] not in fashion_keywords :
+                lst.append(top_fashion_hashtags[i])
 
-            # Update the counter for the current category with the extracted hashtags
-            category_hashtags[hashtag.lstrip('#')].update(all_hashtags)
-        else:
-            continue
-
-    # Combine all fashion-related hashtags across categories
-    all_fashion_hashtags = set().union(*[set(counter) for counter in category_hashtags.values()])
-
-    # Get the top fashion-related hashtags by count
-    top_fashion_hashtags = Counter(all_fashion_hashtags).most_common()
-
-    top_fashion_hashtags= [list(s) for s in top_fashion_hashtags]
-
-    lst=[]
-    for i in range(len(top_fashion_hashtags)):
-        if top_fashion_hashtags[i][0] not in fashion_keywords :
-            lst.append(top_fashion_hashtags[i])
-
-    hashtags = lst
-    print(hashtags)
-    suggested_hashtags = suggest_hashtags(hashtags, num_hashtags=10)
-    df = pd.DataFrame(suggested_hashtags)
-    csv_filename = 'hashtags.csv'
-    df.to_csv(csv_filename, index=False)
-
-    print(f"Data saved to {csv_filename}")
-    return jsonify({"suggested_hashtags": suggested_hashtags})
-
-# Endpoint to scrape products using hashtags
+        hashtags = lst
+        print(hashtags)
+        suggested_hashtags = suggest_hashtags(hashtags, num_hashtags=10)
+        cache_data('suggested_hashtags', {
+            "hashtags": suggested_hashtags,
+            "timestamp": datetime.now().isoformat()
+        })
+        df = pd.DataFrame(suggested_hashtags)
+        csv_filename = 'hashtags.csv'
+        df.to_csv(csv_filename, index=False)
+        print(f"Data saved to {csv_filename}")
+        return jsonify({"suggested_hashtags": suggested_hashtags})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
 @app.route('/trends', methods=['POST'])
 def scrape_products():
-    data = request.json
-    suggested_hashtags = data.get("hashtags", [])
-    all_products = []
+    suggested_hashtags = get_cached_data('suggested_hashtags')
+    if not suggested_hashtags:
+        return jsonify({"error": "Hashtags not found in cache"}), 404
+    scraped_products = []
 
-    # Initialize WebDriver
     options = Options()
     options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")
@@ -218,7 +271,6 @@ def scrape_products():
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=options)
 
-    # Define base URLs
     base_urls = [
         'https://www.getketch.com/search?q=',
         'https://littleboxindia.com/search?type=product&options%5Bprefix%5D=last&q='
@@ -236,14 +288,9 @@ def scrape_products():
 
             try:
                 if 'littleboxindia.com' in base_url:
-                    # Wait for the product listings to load
                     wait = WebDriverWait(driver, 20)
                     wait.until(EC.presence_of_all_elements_located((By.XPATH, "//div[@class='innerer']")))
-
-                    # Scroll to load more products
-                   
-
-                    # Find all product elements after scrolling
+                    scroll_page(1)
                     product_elements = driver.find_elements(By.XPATH, "//div[@class='innerer']")
 
                     for element in product_elements:
@@ -262,26 +309,22 @@ def scrape_products():
                             image_url = image_element.get_attribute('src') or image_element.get_attribute('data-src')
 
                             if product_name and product_url and product_price and image_url:
-                                all_products.append({
-                                    'Hashtag': hashtag,
-                                    'Product Name': product_name,
-                                    'URL': product_url,
-                                    'Price': product_price,
-                                    'Image URL': image_url
+                                scraped_products.append({
+                                    'hashtag': hashtag,
+                                    'name': product_name,
+                                    'url': product_url,
+                                    'price': product_price,
+                                    'image': image_url
                                 })
                         except Exception as e:
                             print(f"Error extracting data for an element on littleboxindia.com: {e}")
 
                 elif 'getketch.com' in base_url:
-                    # Wait for the product listings to load
                     WebDriverWait(driver, 30).until(
                         EC.presence_of_all_elements_located((By.XPATH, "//div[contains(@class, 'st-product')]"))
                     )
-                    
-                    # Scroll to load more products
                     scroll_page(1)
-                    
-                    # Find all product elements
+                
                     product_elements = driver.find_elements(By.XPATH, "//div[contains(@class, 'st-product')]")
                     
                     for element in product_elements:
@@ -323,7 +366,7 @@ def scrape_products():
                                     continue
                             
                             if product_name and product_url and price and image_url:
-                                all_products.append({
+                                scraped_products.append({
                                     'hashtag': hashtag,
                                     'name': product_name,
                                     'url': product_url,
@@ -337,12 +380,15 @@ def scrape_products():
                 print(f"An error occurred while processing the hashtag #{hashtag} on {base_url}: {e}")
 
     driver.quit()
-    df = pd.DataFrame(all_products)
+    df = pd.DataFrame(scraped_products)
+    cache_dataT('trends_data', scraped_products)
     csv_filename = 'trends_data.csv'
     df.to_csv(csv_filename, index=False)
 
     print(f"Data saved to {csv_filename}")
-    return jsonify({"products": all_products})
+    return jsonify({"products": scraped_products})
+
+
 
 @app.route('/interest', methods=['POST'])
 def scrape():
@@ -417,7 +463,6 @@ def scrape():
 @app.route('/try-on', methods=['POST'])
 def try_on():    
     try:
-        # Fetch the garment image
         garm_img_url = request.json['garm_img_url']
         print("Received image URL:", garm_img_url)
 
@@ -453,7 +498,6 @@ def try_on():
 
 @app.route('/get_image/<filename>')
 def get_image(filename):
-    # Read image path from CSV
     with open('image_paths.csv', 'r') as csvfile:
         reader = csv.reader(csvfile)
         for row in reader:
@@ -462,6 +506,7 @@ def get_image(filename):
                 return send_file(image_path, mimetype='image/webp')
     return 'Image not found', 404
 
+cursor.close()
 sqlite_conn.commit()
 
 if __name__ == '__main__':
