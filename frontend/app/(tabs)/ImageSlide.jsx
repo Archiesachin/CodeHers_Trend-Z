@@ -8,17 +8,19 @@ import {
   TouchableOpacity,
   Text,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native"; // Import useNavigation hook
+import { useNavigation } from "@react-navigation/native";
 
-// Import images directly
-import homequizImage from "../assets/homequiz.png";
-import snapImage from "../assets/snap.png";
-import trendsImage from "../assets/trends.png";
+import homequizImage from "../../assets/homequiz.png";
+import snapImage from "../../assets/snap.png";
+import trendsImage from "../../assets/trends.png";
+
+const placeholderImage = require("../../assets/homequiz.png");
+
 
 const images = [
-  { id: "1", source: homequizImage, route: "QuizComponent" },
+  { id: "1", source: placeholderImage, route: "home" },
   { id: "2", source: snapImage, route: "snapStory" },
-  { id: "3", source: trendsImage, route: "trends" }, // Define routes
+  { id: "3", source: trendsImage, route: "trends" },
 ];
 
 const { width } = Dimensions.get("window");
@@ -26,7 +28,7 @@ const { width } = Dimensions.get("window");
 const ImageSlideshow = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef(null);
-  const navigation = useNavigation(); // Access navigation object
+  const navigation = useNavigation();
 
   const handleScroll = (event) => {
     const index = Math.round(event.nativeEvent.contentOffset.x / width);
@@ -46,7 +48,7 @@ const ImageSlideshow = () => {
   }, []);
 
   const handlePress = (route) => {
-    navigation.navigate(route); // Navigate to the specified route
+    navigation.navigate(route);
   };
 
   const renderItem = ({ item }) => (
@@ -91,6 +93,7 @@ const styles = StyleSheet.create({
   container: {
     width: "100%",
     height: 210,
+    marginTop: 20,
   },
   imageContainer: {
     width,

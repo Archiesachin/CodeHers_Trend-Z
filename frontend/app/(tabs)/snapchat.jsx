@@ -14,12 +14,15 @@ import { doc, updateDoc, increment , getDoc} from 'firebase/firestore';
 
 
 
+
 const Snapchat = () => {
   const router = useRouter();
   const cameraRef = useRef(null);
   const [cameraMode, setCameraMode] = useState('picture');
   const [picture, setPicture] = useState("");
   const [accountName, setAccountName] = useState("");
+
+  const [isUserDataLoaded, setIsUserDataLoaded] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -29,19 +32,106 @@ const Snapchat = () => {
           const userDoc = await getDoc(doc(firestoreDB, 'users', user.uid));
           if (userDoc.exists()) {
             const userData = userDoc.data();
+            console.log("Fetched user data:", userData); // Debugging
             setAccountName(userData.fullName || "Default User");
           } else {
             console.log("No such user document!");
             setAccountName("Default User");
           }
+        } else {
+          setAccountName("Default User");
         }
       } catch (error) {
         console.error('Failed to fetch user data:', error);
+        setAccountName("Default User"); // Ensure fallback value
+      } finally {
+        setIsUserDataLoaded(true);
       }
     };
   
     fetchUserData();
   }, []);
+  
+  
+  const handleShare = async (type, text, picture, room = null) => {
+    if (!isUserDataLoaded) {
+      alert("User data is still loading. Please try again.");
+      return;
+    }
+  
+    if (picture) {
+      try {
+        // Fetch the image as a blob
+        const response = await fetch(picture);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch image: ${response.statusText}`);
+        }
+        const blob = await response.blob();
+        
+        // Create a reference for the image in Firebase Storage
+        const storageRef = ref(storage, `images/${Date.now()}.jpg`);
+        
+        // Check if accountName is set
+        console.log("Account Name before upload:", accountName); // Debugging
+  
+        // Upload the image to Firebase Storage with metadata
+        await uploadBytes(storageRef, blob, {
+          customMetadata: {
+            accountName,
+            text: text || "",
+          },
+        });
+  
+        // Get the download URL of the uploaded image
+        const downloadURL = await getDownloadURL(storageRef);
+        console.log("Image uploaded successfully:", downloadURL);
+  
+        // Update the snapScore if sharing on story
+        if (type === 'story') {
+          const user = firebaseAuth.currentUser;
+          if (user) {
+            const userRef = doc(firestoreDB, 'users', user.uid);
+            await updateDoc(userRef, {
+              snapScore: increment(1), // Increment snapScore by 1
+            });
+          }
+          
+          // Redirect to snapStory page with the image URL
+          router.push({
+            pathname: '/snapStory',
+            query: { pictureUri: downloadURL }, // Use query instead of params
+          });
+  
+        } else if (type === 'chat' && room) {
+          // Add the image to the selected chat room
+          const chatRef = doc(firestoreDB, 'chats', room._id);
+          await updateDoc(chatRef, {
+            messages: arrayUnion({
+              text,
+              image: downloadURL,
+              sender: firebaseAuth.currentUser?.uid || "unknown",
+              timestamp: serverTimestamp(),
+            }),
+          });
+  
+          // Redirect to the chat room
+          router.push({
+            pathname: `/chat/${room._id}`,
+            query: { pictureUri: downloadURL }, // Use query instead of params
+          });
+        }
+        
+        alert('Image shared successfully.');
+  
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        alert(`Failed to upload and share the image: ${error.message}`);
+      }
+    } else {
+      alert("No picture to share.");
+    }
+  };
+  
 
 async function handleTakePicture() {
   if (cameraRef.current) {
@@ -55,46 +145,81 @@ async function handleTakePicture() {
   }
 }
 
-const handleShare = async (picture, text) => {
-    if (picture) {
-      try {
-        // Fetch the image from the URI and convert it to a blob
-        const response = await fetch(picture);
-        const blob = await response.blob();
-
-        // Create a reference for the new image in Firebase Storage
-        const storageRef = ref(storage, `images/${Date.now()}.jpg`);
-
-        // Upload the image blob to Firebase Storage with metadata
-        await uploadBytes(storageRef, blob, {
-          customMetadata: { 
-            accountName: name, // Metadata with the user's full name
-            text: text || '' // Adding text to metadata
-          },
-        });
-
-        // Get the download URL for the uploaded image
-        const downloadURL = await getDownloadURL(storageRef);
-        console.log("Image uploaded successfully:", downloadURL);
+// const handleShare = async (type, text, picture, room = null) => {
+//   if (picture) {
+//     try {
+//       // Fetch the image as a blob
+//       const response = await fetch(picture);
+//       if (!response.ok) {
+//         throw new Error(`Failed to fetch image: ${response.statusText}`);
+//       }
+//       const blob = await response.blob();
+      
+//       // Create a reference for the image in Firebase Storage
+//       const storageRef = ref(storage, `images/${Date.now()}.jpg`);
+      
+//       // Get current user and their name
+//       const user = firebaseAuth.currentUser;
+//       const accountName = user ? user.fullName || "Default User" : "Default User";
+      
+//       // Upload the image to Firebase Storage with metadata
+//       await uploadBytes(storageRef, blob, {
+//         customMetadata: {
+//           accountName,
+//           text: text || "",
+//         },
+//       });
+      
+//       // Get the download URL of the uploaded image
+//       const downloadURL = await getDownloadURL(storageRef);
+//       console.log("Image uploaded successfully:", downloadURL);
+      
+//       // Update the snapScore if sharing on story
+//       if (type === 'story') {
+//         if (user) {
+//           const userRef = doc(firestoreDB, 'users', user.uid);
+//           await updateDoc(userRef, {
+//             snapScore: increment(1), // Increment snapScore by 1
+//           });
+//         }
         
-        // Update the user's SnapScore
-        const user = firebaseAuth.currentUser;
-        if (user) {
-          const userRef = doc(firestoreDB, 'users', user.uid);
-          await updateDoc(userRef, {
-            snapScore: increment(1) // Increment SnapScore by 1
-          });
-        }
+//         // Redirect to snapStory page with the image URL
+//         router.push({
+//           pathname: '/snapStory',
+//           params: { pictureUri: downloadURL },
+//         });
 
-        // Redirect to SnapStory with the image URL and text as parameters
-        navigation.navigate('snapStory', { pictureUri: downloadURL, text });
-      } catch (error) {
-        console.error('Error uploading image:', error);
-        alert("Failed to upload and share the image. Please check the console for more details.");
-      }
-    }
-  };
-  
+//       } else if (type === 'chat' && room) {
+//         // Add the image to the selected chat room
+//         const chatRef = doc(firestoreDB, 'chats', room._id);
+//         await updateDoc(chatRef, {
+//           messages: arrayUnion({
+//             text,
+//             image: downloadURL,
+//             sender: user?.uid || "unknown",
+//             timestamp: serverTimestamp(),
+//           }),
+//         });
+
+//         // Redirect to the chat room
+//         router.push({
+//           pathname: `/chat/${room._id}`,
+//           params: { pictureUri: downloadURL },
+//         });
+//       }
+      
+//       alert('Image shared successfully.');
+
+//     } catch (error) {
+//       console.error('Error uploading image:', error);
+//       alert(`Failed to upload and share the image: ${error.message}`);
+//     }
+//   } else {
+//     alert("No picture to share.");
+//   }
+// };
+
+
   if (picture) return <PictureView picture={picture} setPicture={setPicture} handleShare={handleShare}/>
 
   return (

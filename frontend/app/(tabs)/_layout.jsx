@@ -275,13 +275,13 @@ const TabsLayout = () => {
           headerShown: false,
         }}
       />
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="ImageSlide"
         options={{
           tabBarButton: () => null,
           headerShown: false,
         }}
-      />
+      /> */}
     </Tabs>
   );
 };
