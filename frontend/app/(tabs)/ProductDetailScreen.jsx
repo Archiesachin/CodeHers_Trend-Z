@@ -140,7 +140,7 @@ const ProductDetailScreen = () => {
 
           <View className="flex-row justify-between mt-4 px-2">
             <TouchableOpacity
-              className="bg-gray-100 px-4 rounded-lg flex-1 mr-2 justify-center items-center w-[150px]"
+              className="bg-gray-100 px-4 rounded-lg flex-1 mr-2 justify-center items-center w-[150px] py-4"
               onPress={addToCart}
             >
               <Text className="text-secondary-100 font-bold text-center">
@@ -178,10 +178,11 @@ const ProductDetailScreen = () => {
                   );
                 }
               }}
+              className="bg-gray-100 px-4 rounded-lg flex-1 mr-2 justify-center items-center w-[150px] py-4 ml-2"
             >
-              <Text>Try it on me!</Text>
+              <Text className="text-secondary-100 font-semibold">Try On</Text>
             </TouchableOpacity>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               onPress={handleTryOn}
               className="bg-gray-100 p-4 rounded-lg flex-1 ml-2"
               disabled={isLoading}
@@ -189,7 +190,7 @@ const ProductDetailScreen = () => {
               <Text className="text-secondary-100 text-center font-bold">
                 {isLoading ? "Processing..." : "Try On"}
               </Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
           {processedImageUrl && (
             <Image
