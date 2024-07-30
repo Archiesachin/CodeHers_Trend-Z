@@ -153,13 +153,13 @@ const Cart = () => {
     <View className="items-center bg-gray-100 p-4 rounded-lg shadow-md mb-4 mx-4 h-72">
       <View className="flex-row ">
         <Image
-          source={{ uri: item.image || item["Image URL"] }}
+          source={{ uri: item.image || item["Image URL"] || item.image_url }}
           className="w-[120px] h-64 mr-4"
           style={styles.image}
         />
         <View className="flex-1">
           <Text className="text-lg font-semibold">
-            {item.name || item["Product Name"]}
+            {item.name || item["Product Name"] || item.product_name}
           </Text>
           <Text className="text-blue-500 mt-2 font-md">
             Rs.{item.price || item["Price"]}
@@ -179,12 +179,20 @@ const Cart = () => {
         </TouchableOpacity>
       </View>
       <TouchableOpacity
-  onPress={() => handleShare(item.image || item["Image URL"], item.name || item["Product Name"], item.price || item["Price"], item.image || item["Image URL"])}
-  className="ml-28 mt-2 bg-secondary p-2 rounded-lg"
->
-  <Text className="text-white font-semibold text-md">Share to Fwd Snap</Text>
-</TouchableOpacity>
-
+        onPress={() =>
+          handleShare(
+            item.image || item["Image URL"],
+            item.name || item["Product Name"],
+            item.price || item["Price"],
+            item.image || item["Image URL"]
+          )
+        }
+        className="ml-28 mt-2 bg-secondary p-2 rounded-lg"
+      >
+        <Text className="text-white font-semibold text-md">
+          Share to Fwd Snap
+        </Text>
+      </TouchableOpacity>
     </View>
   );
   
