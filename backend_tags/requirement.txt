@@ -1,7 +1,8 @@
 Flask
-Flask-Cors
+flask-cors
 selenium
 webdriver-manager
-pandas
-gradio_client
+gradio-client
 Pillow
+pandas
+schedule
