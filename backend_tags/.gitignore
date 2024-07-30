@@ -1,2 +1,4 @@
 venv
 .env
+last
+__pycache__

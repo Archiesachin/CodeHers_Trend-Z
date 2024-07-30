@@ -28,6 +28,7 @@ const TakePhotoScreen = ({ navigation }) => {
       Alert.alert('Permission required', 'Camera permissions are required to take a photo.');
       return;
     }
+  
 
     // Launch camera to take a photo
     let result = await ImagePicker.launchCameraAsync({
@@ -179,6 +180,7 @@ const TakePhotoScreen = ({ navigation }) => {
             />
           </View>
         )}
+        
       </View>
     </ScrollView>
   );

@@ -97,11 +97,14 @@ const Profile = () => {
       </View>
 
       <View className="justify-between items-start flex-row px-6 mt-4">
-        <View className="w-[150px] h-[50px] border-2 border-gray-100 rounded-xl items-center justify-center">
+        <TouchableOpacity
+          className="w-[150px] h-[50px] border-2 border-gray-100 rounded-xl items-center justify-center"
+          onPress={() => navigation.navigate("DiscountPage")}
+        >
           <Text className="font-bold text-center text-secondary-100">
             Offers
           </Text>
-        </View>
+        </TouchableOpacity>
         <View className="w-[150px] h-[50px] border-2 border-gray-100 rounded-xl items-center justify-center">
           <Text className="font-bold text-center text-secondary-100">
             Collect and redeem

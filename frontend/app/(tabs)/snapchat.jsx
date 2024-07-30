@@ -43,24 +43,28 @@ const Snapchat = () => {
     fetchUserData();
   }, []);
 
-  async function handleTakePicture() {
-    if (cameraRef.current) {
+async function handleTakePicture() {
+  if (cameraRef.current) {
+    try {
       const response = await cameraRef.current.takePictureAsync({});
-      console.log(response.uri);
+      console.log("Captured image URI:", response.uri);
       setPicture(response.uri);
+    } catch (error) {
+      console.error("Error taking picture:", error);
     }
   }
+}
 
-  const handleShare = async (picture, text) => {
+const handleShare = async (picture, text) => {
     if (picture) {
       try {
         // Fetch the image from the URI and convert it to a blob
         const response = await fetch(picture);
         const blob = await response.blob();
-        
+
         // Create a reference for the new image in Firebase Storage
         const storageRef = ref(storage, `images/${Date.now()}.jpg`);
-        
+
         // Upload the image blob to Firebase Storage with metadata
         await uploadBytes(storageRef, blob, {
           customMetadata: { 
@@ -68,7 +72,7 @@ const Snapchat = () => {
             text: text || '' // Adding text to metadata
           },
         });
-        
+
         // Get the download URL for the uploaded image
         const downloadURL = await getDownloadURL(storageRef);
         console.log("Image uploaded successfully:", downloadURL);
@@ -81,18 +85,15 @@ const Snapchat = () => {
             snapScore: increment(1) // Increment SnapScore by 1
           });
         }
-        
+
         // Redirect to SnapStory with the image URL and text as parameters
         navigation.navigate('snapStory', { pictureUri: downloadURL, text });
       } catch (error) {
         console.error('Error uploading image:', error);
         alert("Failed to upload and share the image. Please check the console for more details.");
       }
-    } else {
-      alert("No picture to share.");
     }
   };
-  
   
   if (picture) return <PictureView picture={picture} setPicture={setPicture} handleShare={handleShare}/>
 
@@ -110,5 +111,6 @@ const Snapchat = () => {
     </CameraView>
   )
 }
+
 
 export default Snapchat;

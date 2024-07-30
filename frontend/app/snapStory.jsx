@@ -17,7 +17,7 @@ const SnapStory = () => {
 
   const fetchImages = async () => {
     try {
-      const storageRef = ref(storage, 'images/');
+      const storageRef = ref(storage, "images/");
       const imagesList = await listAll(storageRef);
       const imagePromises = imagesList.items.map(async (imageRef) => {
         const url = await getDownloadURL(imageRef);

@@ -125,7 +125,12 @@ const TabsLayout = () => {
           title: "Fashion Snap",
           headerShown: false,
           tabBarIcon: ({ focused, color }) => (
-            <TabIcon icon={icons.camera} name="Fwd Snap" focused={focused} color={color}/>
+            <TabIcon
+              icon={icons.camera}
+              name="Fwd Snap"
+              focused={focused}
+              color={color}
+            />
           ),
           tabBarButton: (props) => (
             <TouchableWithoutFeedback onPress={() => handleContinue()}>
@@ -251,6 +256,27 @@ const TabsLayout = () => {
       />
       <Tabs.Screen
         name="TakePhotoScreen"
+        options={{
+          tabBarButton: () => null,
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="DiscountTile"
+        options={{
+          tabBarButton: () => null,
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="DiscountPage"
+        options={{
+          tabBarButton: () => null,
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="ImageSlide"
         options={{
           tabBarButton: () => null,
           headerShown: false,
