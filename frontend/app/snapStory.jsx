@@ -8,34 +8,36 @@ import { icons } from '../constants';
 
 const SnapStory = () => {
   const [data, setData] = useState([]);
+  const [selectedItem, setSelectedItem] = useState(null);
   const navigation = useNavigation();
 
   useEffect(() => {
-    const fetchImages = async () => {
-      try {
-        const storageRef = ref(storage, 'images/');
-        const imagesList = await listAll(storageRef);
-        const imagePromises = imagesList.items.map(async (imageRef) => {
-          const url = await getDownloadURL(imageRef);
-          const metadata = await getMetadata(imageRef);
-          return {
-            id: imageRef.name,
-            pictureUri: url,
-            accountName: metadata.customMetadata?.accountName || "Default User", // Retrieve account name from metadata
-          };
-        });
-
-        const imageData = await Promise.all(imagePromises);
-        setData(imageData);
-      } catch (error) {
-        console.error("Error fetching images:", error);
-      }
-    };
-
     fetchImages();
   }, []);
 
-  const [selectedItem, setSelectedItem] = useState(null);
+  const fetchImages = async () => {
+    try {
+      const storageRef = ref(storage, 'images/');
+      const imagesList = await listAll(storageRef);
+      const imagePromises = imagesList.items.map(async (imageRef) => {
+        const url = await getDownloadURL(imageRef);
+        const metadata = await getMetadata(imageRef);
+        return {
+          id: imageRef.name,
+          pictureUri: url,
+          accountName: metadata.customMetadata?.accountName || "Default User",
+          text: metadata.customMetadata?.text || "",
+          price: metadata.customMetadata?.price || "",
+          imageURL: metadata.customMetadata?.imageURL || "",
+        };
+      });
+
+      const imageData = await Promise.all(imagePromises);
+      setData(imageData);
+    } catch (error) {
+      console.error("Error fetching images:", error);
+    }
+  };
 
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => setSelectedItem(item)}>
@@ -69,9 +71,9 @@ const SnapStory = () => {
   const handleViewProduct = (item) => {
     navigation.navigate("ProductDetailScreen", {
       product: JSON.stringify({
-        image: item.pictureUri,
-        name: "Sample Product",
-        price: "999", // Replace with actual product price if available
+        image: item.imageURL,
+        name: item.text,
+        price: item.price,
       }),
     });
   };
@@ -110,13 +112,17 @@ const SnapStory = () => {
             <View style={{ width: '80%', height: '80%', backgroundColor: '#333333', borderRadius: 8 }}>
               <Image
                 source={{ uri: selectedItem?.pictureUri }}
-                style={{ width: '100%', height: '80%', borderRadius: 8 }}
+                style={{ width: '100%', height: '70%', borderRadius: 8 }}
                 onLoad={() => console.log("Selected image loaded:", selectedItem?.pictureUri)}
                 onError={(error) => {
                   console.log("Selected image load error:", error.nativeEvent.error);
                   Alert.alert("Image Load Error", "Unable to load selected image.");
                 }}
               />
+              <View style={{ padding: 10 }}>
+                <Text style={{ fontSize: 18, fontWeight: 'bold', color: 'white' }}>{selectedItem?.accountName}</Text>
+                <Text style={{ fontSize: 16, color: 'white', marginTop: 5 }}>{selectedItem?.text || ""}</Text>
+              </View>
               <TouchableOpacity
                 onPress={() => handleViewProduct(selectedItem)}
                 style={{ backgroundColor: '#fff', padding: 10, marginTop: 10, borderRadius: 8, alignItems: 'center' }}

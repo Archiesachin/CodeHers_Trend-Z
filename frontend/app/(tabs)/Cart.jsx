@@ -102,45 +102,44 @@ const Cart = () => {
     });
   };
 
-  const handleShare = async (picture) => {
+  const handleShare = async (picture, productName, price, imageURL) => {
     if (picture) {
       try {
-        // Fetch the image from the URI and convert it to a blob
         const response = await fetch(picture);
         const blob = await response.blob();
-        
-        // Create a reference for the new image in Firebase Storage
         const storageRef = ref(storage, `images/${Date.now()}.jpg`);
-        
-        // Upload the image blob to Firebase Storage with metadata
+  
         await uploadBytes(storageRef, blob, {
-          customMetadata: { accountName: name }, // Metadata with the user's full name
+          customMetadata: {
+            accountName: name,
+            text: productName,
+            price: price,
+            imageURL: imageURL,
+          },
         });
-        
-        // Get the download URL for the uploaded image
+  
         const downloadURL = await getDownloadURL(storageRef);
         console.log("Image uploaded successfully:", downloadURL);
-        
-        // Update the user's SnapScore
+  
         const user = firebaseAuth.currentUser;
         if (user) {
           const userRef = doc(firestoreDB, 'users', user.uid);
           await updateDoc(userRef, {
-            snapScore: increment(1) // Increment SnapScore by 1
+            snapScore: increment(1),
           });
         }
-        
-        // Redirect to SnapStory with the image URL as a parameter
+  
         navigation.navigate('snapStory', { pictureUri: downloadURL });
       } catch (error) {
         console.error('Error uploading image:', error);
-        alert("Failed to upload and share the image. Please check the console for more details.");
+        alert("Failed to upload and share the image.");
       }
     } else {
       alert("No picture to share.");
     }
   };
-
+  
+  
   const calculateTotalPrice = () => {
     return cartItems.reduce((total, item) => total + (item.price || 0) * (item.quantity || 1), 0).toFixed(2);
   };
@@ -180,14 +179,15 @@ const Cart = () => {
         </TouchableOpacity>
       </View>
       <TouchableOpacity
-        onPress={() => handleShare(item.image || item["Image URL"])}
-        className="ml-28 mt-2 bg-secondary p-2 rounded-lg"
-      >
-        <Text className="text-white font-semibold text-md">Share to Fwd Snap</Text>
-      </TouchableOpacity>
+  onPress={() => handleShare(item.image || item["Image URL"], item.name || item["Product Name"], item.price || item["Price"], item.image || item["Image URL"])}
+  className="ml-28 mt-2 bg-secondary p-2 rounded-lg"
+>
+  <Text className="text-white font-semibold text-md">Share to Fwd Snap</Text>
+</TouchableOpacity>
+
     </View>
   );
-
+  
   return (
     <View className="flex-1">
       <View className="flex-row justify-between items-center mb-4 bg-secondary-100 pt-14 pb-4 px-4">

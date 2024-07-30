@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -5,18 +6,21 @@ import {
   Alert,
   Modal,
   Image,
+  TextInput,
 } from "react-native";
-import React, { useState, useEffect } from "react";
 import { icons } from '../constants';
 import { saveToLibraryAsync } from 'expo-media-library';
 import RoomSelectionModal from '../app/(tabs)/RoomSelectionModal';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { firestoreDB } from '../config/firebase.config';
+import { ref, uploadBytes, getDownloadURL, updateMetadata } from 'firebase/storage';
+import { storage } from '../config/firebase.config';
 
 const PictureView = ({ picture, setPicture, handleShare }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [roomSelectionVisible, setRoomSelectionVisible] = useState(false);
   const [rooms, setRooms] = useState([]);
+  const [text, setText] = useState("");
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(firestoreDB, 'chats'), (querySnapshot) => {
@@ -28,8 +32,13 @@ const PictureView = ({ picture, setPicture, handleShare }) => {
   }, []);
 
   const handleShareOnStory = () => {
-    handleShare();
+    handleShare('story', text, picture); // Pass the type, text, and picture to handleShare
     setModalVisible(false);
+  };
+
+  const handleShareOnChat = (room) => {
+    handleShare('chat', text, picture, room); // Pass the type, text, picture, and room to handleShare
+    setRoomSelectionVisible(false);
   };
 
   return (
@@ -38,6 +47,17 @@ const PictureView = ({ picture, setPicture, handleShare }) => {
         source={{ uri: picture }}
         className="w-full h-full"
       />
+      <TextInput
+        value={text}
+        onChangeText={setText}
+        placeholder="Add text to your story"
+        className="absolute bottom-20 w-3/4 bg-white p-2 rounded-md"
+        multiline
+      />
+      <View className="absolute bottom-40 w-full p-4 justify-center text-center flex items-center bg-gray-500 bg-opacity-1"
+>
+      <Text className="text-white text-2xl">{text}</Text>
+      </View>
       <View className="flex-row mt-[-100px]">
         <TouchableOpacity
           onPress={async () => {
@@ -114,7 +134,9 @@ const PictureView = ({ picture, setPicture, handleShare }) => {
         visible={roomSelectionVisible}
         rooms={rooms}
         picture={picture}
+        text={text} // Pass the text to RoomSelectionModal
         onClose={() => setRoomSelectionVisible(false)}
+        onSelectRoom={handleShareOnChat}
       />
     </View>
   );

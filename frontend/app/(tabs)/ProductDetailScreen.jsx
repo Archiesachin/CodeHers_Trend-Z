@@ -151,6 +151,9 @@ const ProductDetailScreen = () => {
             >
               <Text className="text-secondary-100 font-bold">Wishlist</Text>
             </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push('/TakePhotoScreen')}>
+      <Text>Go to Take Photo Screen</Text>
+    </TouchableOpacity>
             <TouchableOpacity
               onPress={handleTryOn}
               className="bg-gray-100 p-4 rounded-lg flex-1 ml-2"
