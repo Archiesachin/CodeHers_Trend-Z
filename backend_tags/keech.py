@@ -13,6 +13,9 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.edge.service import Service as EdgeService
+from webdriver_manager.microsoft import EdgeChromiumDriverManager
+from selenium.webdriver.edge.options import Options as EdgeOptions
 import pandas as pd
 import time
 from gradio_client import Client, handle_file
@@ -195,6 +198,10 @@ def get_cached_trends_data(hashtag):
     
     return data
 
+def cache_dataT(hashtag, data, table_name='trends_cache'):
+    cursor.execute("INSERT OR REPLACE INTO {} (hashtag, data) VALUES (?, ?)".format(table_name), (hashtag, json.dumps(data)))
+    sqlite_conn.commit()
+
 @app.route('/get-suggested-hashtags', methods=['GET'])
 def get_suggested_hashtags():
     suggested_hashtags = get_cached_data('suggested_hashtags')
@@ -245,10 +252,10 @@ def suggest_hashtags_endpoint():
         hashtags = lst
         print(hashtags)
         suggested_hashtags = suggest_hashtags(hashtags, num_hashtags=10)
-        cache_data('suggested_hashtags', {
-            "hashtags": suggested_hashtags,
-            "timestamp": datetime.now().isoformat()
-        })
+        # cache_data('suggested_hashtags', {
+        #     "hashtags": suggested_hashtags,
+        #     "timestamp": datetime.now().isoformat()
+        # })
         df = pd.DataFrame(suggested_hashtags)
         csv_filename = 'hashtags.csv'
         df.to_csv(csv_filename, index=False)
@@ -264,12 +271,12 @@ def scrape_products():
         return jsonify({"error": "Hashtags not found in cache"}), 404
     scraped_products = []
 
-    options = Options()
+    options = EdgeOptions()
     options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=options)
+    service = EdgeService(EdgeChromiumDriverManager().install())
+    driver = webdriver.Edge(service=service, options=options)
 
     base_urls = [
         'https://www.getketch.com/search?q=',
@@ -381,7 +388,7 @@ def scrape_products():
 
     driver.quit()
     df = pd.DataFrame(scraped_products)
-    cache_dataT('trends_data', scraped_products)
+    # cache_dataT('trends_data', scraped_products)
     csv_filename = 'trends_data.csv'
     df.to_csv(csv_filename, index=False)
 
@@ -401,12 +408,12 @@ def scrape():
     print("Selected tags:", selected_tags)
 
     def start_browser():
-        options = webdriver.ChromeOptions()
-        options.add_argument('--disable-gpu')
-        options.add_argument('--no-sandbox')
-        options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36')
-        service = Service(ChromeDriverManager().install())
-        driver = webdriver.Chrome(service=service, options=options)
+        options = EdgeOptions()
+        options.add_argument("--disable-gpu")
+        options.add_argument("--no-sandbox")
+        options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+        service = EdgeService(EdgeChromiumDriverManager().install())
+        driver = webdriver.Edge(service=service, options=options)
         return driver
 
     driver = start_browser()

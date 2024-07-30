@@ -178,7 +178,7 @@ const ProductDetailScreen = () => {
                   );
                 }
               }}
-              className="bg-gray-100 px-4 rounded-lg flex-1 mr-2 justify-center items-center w-[150px] py-4 ml-2"
+              className="bg-gray-100 px-4 rounded-lg flex-1  justify-center items-center w-[150px] py-4 ml-2"
             >
               <Text className="text-secondary-100 font-semibold">Try On</Text>
             </TouchableOpacity>
