@@ -1,42 +1,59 @@
 # Trend-Z
 Welcome to Trendz, an app designed specifically for Gen Z to keep up with the latest fashion trends. 
 
+## Table of Contents
+
+- [Problem Statement](#problem-statement)
+- [Features](#features)
+- [Demo](#demo)
+- [Technology Stack](#technology-stack)
+
+
+## Problem Statement
+Gen Z consumers are highly attuned to trends and fashion, often turning to platforms like Instagram to stay current with the latest in-the-moment styles. They desire immersive shopping experiences that replicate the feel of in-store shopping from the comfort of their homes. Additionally, Gen Z uses social media not only to connect with friends and family but also to find a sense of belonging among like-minded individuals who share their interests and values. They seek avenues to express themselves creatively and to experiment with different ways of being themselves.
+
+To address these needs, we have selected the use cases of trend-centric recommendations and user engagement on the platform, aiming to provide personalized and engaging shopping experiences that resonate with Gen Z's preferences and behaviors.
+
+## Features
+
 #### 1. Personalized Recommendations
- - When users sign onto our platform for the first time, they type their interests.
- - These interests are stored in the Firebase database and passed to the Flask server.
- - The Flask server scrapes Myntra’s website to recommend products based on those interests displayed on the home screen.
+ In traditional fashion ecommerce platforms when a user signs in for the first time they are recommended products based on relevance and popularity, to personalize those recommendations Trendz asks the users about their interests when they sign in for the first time and then uses that to scrape myntra’s website in realtime and dynamically fetches the products on the home screen that caters to them.This ensures that their individuality is maintained and recommendations are personalized and up to date.
+
 
 #### 2. Core Quiz
- - Users take the “Core Quiz” on the home screen to determine their fashion aesthetic through a set of choices.
- - Based on the classified categories, products that match their aesthetic are recommended using Python and Flask.
+Cores is a GenZ slang term used to define fashion aesthetics and styles. For example, people who liked the fashion of the barbie movie, they define their fashion as barbie core or others who like corporate wear define it as corporate core. To improve product visibility and reach we added a quiz for users to choose different fashion aesthetics based on a series of questions, and then based on their answers they recommended products that fall into those categories. Users can retake the quiz any number of times to find new products and rediscover new fashion aesthetics.
+
 
 #### 3. fwdSnaps
- - Users can view other people’s fwdSnaps, a built-in Snapchat-like feature, and shop products shared in them.
- - They receive a daily notification at a random time via React Native and Expo Notification, reminding them to upload a snap of their outfit of the day (OOTD) to gain Fwd Snap Points and maintain a FWD Snap Streak.
- - This offers discounts and incentives to ensure users engage with the app daily.
- - Snaps can be uploaded to their story, stored locally on their device, or shared in virtual chatrooms.
+o enhance user engagement, we have introduced FwdSnap, inspired by popular social media apps like Snapchat and BeReal, which are used daily by 80% of Gen Z. Built from the ground up with unique features, FwdSnap sends a daily notification at a random time, reminding users to upload a snap and maintain their Fwd Snap Score. This score, reflecting consecutive days of story uploads, can be used for discounts and offers. Users can save snaps locally or share them in virtual chat rooms. Additionally, users can share liked products on their FwdSnap Story, including direct links for others to view, try on, and add to their cart, boosting product reach and sales.
 
 
 #### 4. Virtual Chatrooms
- - Users can connect with others through in-built virtual chatrooms built using React Native and Expo.
- - Utilizing Firebase for the database, these chatrooms allow users to chat and share images, gather opinions, and foster a sense of community, enhancing user engagement.
+ Virtual chat rooms are online fashion communities which connect users who share the same fashion interest. Users can easily join any community or create a new community to share content and updates relating to their fashion interests. They can engage in discussions based on their interests, share their style with their friends, collaborate on outfits, get instant feedback, which  makes shopping a truly social experience.
 
 
 #### 5. Daily Fashion Trends
- - Users are shown daily fashion trends scraped from Instagram every day at 12:00 AM using Python scheduling and Rapid API.
- - Products aligning with popular hashtags are fetched from fashion stores using Selenium with Chrome and Edge Drivers, and this data is stored in a SQLite Database to ensure users see the most updated trends and products daily.
+
+To recommend trending hashtags, we utilize Rapid API to scrape hashtags from keywords such as fashion, trends, and styles. Our approach is driven by the fact that Gen Z heavily relies on Instagram for discovering the latest trends. Therefore, we focus on Instagram posts from the last 30 days that have received the highest engagement, meaning those that were well-received by users.
+We then apply a weighted scoring system to determine the most trending hashtags. This scoring takes into account factors such as length, count, and uniqueness. The top 10 most relevant hashtags are then suggested based on this analysis.
+After obtaining these hashtags, they are used as search queries on various websites to retrieve top 4 products for them. The hashtags and products are automatically fetched everyday at 12 AM to ensure that the latest trends and products are displayed to the user.
+
 
 #### 6. Virtual Try-On
- - Users can try on products virtually by taking a picture of themselves using our built-in virtual try-on feature.
- - This allows them to visualize how products would look on their body, leveraging an advanced external Stable Diffusion model integrated with Gradio, Hugging Face, and a Flask server.
- - This feature offers a convenient shopping experience, enabling users to try on clothes from the comfort of their homes before making a purchase.
+Genz being a tech savvy generation likes to enjoy in store shopping like experience at the comfort of their home . By leveraging a stable diffusion model we have implemented a try on system for users to help them visualize the clothes on them before buying. The user takes a photo of themselves following the instructions given and then this image along with the product image are sent to the model and the output is obtained. Virtual try-ons make the product return rate less as users have a clear idea how it would look like on them without physically trying on the product.
+
 
 #### 7. Snap Score and Discounts
- - Users can check their cart and view their Snap Score from their profile page.
- - They can redeem discounts calculated using a Weighted Multivariable Discount Model.
- - This model applies weights to their Snap Score, location, cohort, purchase amount, and engagement, utilizing Python and Firebase.
+ TrendZ not only makes the shopping experience fun but also rewarding. The users can see unlocked discounts on their profile page that are calculated based on various factors such as their engagement, fwdsnap points, past purchase amount and location using a Weighted Multivariable Discount Model. The model then shows the various discounts that the user can redeem with the top weighted factor for the resulted discount. 
 
-### Tech We used:
+
+## Demo
+
+https://github.com/user-attachments/assets/19b102be-46fe-4980-b489-007aeae6175e
+
+
+## Technology Stack
+
 ##### Trend Scraping and Analysis
  - APIs & Data Processing: Rapid API, Python, JSON, HTTP Client
  - Automation & Scraping: Selenium, ChromeDriver, and EdgeDriver
@@ -51,5 +68,5 @@ Welcome to Trendz, an app designed specifically for Gen Z to keep up with the la
  - Languages: Python, JavaScript
 
 
-Made by CodeHers, 2024.
+## Made by CodeHers, 2024.
 [Archie](https://github.com/Archiesachin) ,[Nidhi](https://github.com/nidhik5) and [Meetali](https://github.com/meetalik8)!
